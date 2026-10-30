@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F172A">
+<title>PhysioMotion Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* פריסה: כותרת מכשיר בכחול כהה, ואז שולחן עבודה בשתי עמודות (בדיקה + אות חי | תוצאות + דוח) שנערמות בטלפון */
+:root{
+  --navy:#0F172A; --cyan:#06B6D4; --cyan-ink:#0E7490; --amber:#F59E0B; --red:#EF4444; --green:#10B981;
+  --bg:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9; --line:#E2E8F0; --ink:#0F172A; --ink-2:#475569; --ink-3:#94A3B8;
+  --trace-a:#06B6D4; --trace-b:#F59E0B; --grid:#E2E8F0; --warn-ink:#92400E; --alert-ink:#B91C1C;
+  --font-body:"IBM Plex Sans Hebrew","Segoe UI","Arial Hebrew",Arial,system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1120; --surface:#111A2E; --surface-2:#18233A; --line:#24314A; --ink:#E2E8F0; --ink-2:#A7B4C8; --ink-3:#64748B;
+    --cyan-ink:#22D3EE; --grid:#24314A; --warn-ink:#FCD34D; --alert-ink:#FCA5A5; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1120; --surface:#111A2E; --surface-2:#18233A; --line:#24314A; --ink:#E2E8F0; --ink-2:#A7B4C8; --ink-3:#64748B;
+  --cyan-ink:#22D3EE; --grid:#24314A; --warn-ink:#FCD34D; --alert-ink:#FCA5A5; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--font-body);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--navy);z-index:30}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.ltr{direction:ltr;unicode-bidi:isolate}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--navy);color:#E2E8F0;
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid #1E293B}
+.top-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.brand svg{flex:none}
+.brand h1{font-size:17px;line-height:1.15;margin:0;font-weight:700;direction:ltr;text-align:right}
+.brand small{display:block;font-size:12px;color:#94A3B8;font-weight:500}
+.badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;
+  background:#1E293B;border:1px solid #334155;color:#CBD5E1;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#64748B;flex:none}
+.dot.live{background:var(--green);animation:pulse 1.6s infinite}
+.dot.sim{background:var(--amber)}
+.dot.err{background:var(--red)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+@media (prefers-reduced-motion:reduce){.dot.live{animation:none}}
+
+main{max-width:1180px;margin:0 auto;padding-block:18px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:980px){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.col{display:grid;gap:16px;min-width:0}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:700}
+.eyebrow{font-size:12px;font-weight:600;color:var(--ink-3)}
+.sub{color:var(--ink-2);font-size:13.5px;margin:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+
+.sensorbar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.switch{display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:600;user-select:none;min-height:40px}
+.switch input{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:var(--line);position:relative;margin:0;cursor:pointer;transition:background .2s;flex:none}
+.switch input::after{content:"";position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked{background:var(--amber)}
+.switch input:checked::after{transform:translateX(-18px)}
+select,input[type=text],textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:14px;width:100%}
+select{width:auto;max-width:100%}
+label.fld{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn:hover{border-color:var(--cyan)}
+.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#062830}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:9px 11px;margin:0}
+.note.warn{background:color-mix(in srgb,var(--amber) 14%,var(--surface));color:var(--ink)}
+.note.err{background:color-mix(in srgb,var(--red) 13%,var(--surface));color:var(--ink)}
+
+.protos{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:560px){.protos{grid-template-columns:1fr 1fr}}
+.proto{text-align:start;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 13px;display:grid;gap:3px}
+.proto b{font-size:15px}
+.proto span{font-size:13px;color:var(--ink-2)}
+.proto .tag{font-size:12px;color:var(--cyan-ink);font-weight:700}
+.proto[aria-pressed="true"]{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 8%,var(--surface));box-shadow:0 0 0 3px color-mix(in srgb,var(--cyan) 18%,transparent)}
+
+.phases{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.phase{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;display:grid;gap:2px;background:var(--surface-2)}
+.phase b{font-size:13.5px}
+.phase.active{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 9%,var(--surface))}
+.phase.done .st{color:var(--green)}
+.phase .st{font-size:11.5px;color:var(--ink-3);font-weight:700}
+.stage{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+@media (max-width:480px){.stage{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.target{width:150px;height:150px;position:relative;flex:none}
+.target canvas{width:150px;height:150px;display:block}
+.timer{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-family:var(--font-mono);font-weight:600;font-size:30px;color:var(--ink)}
+.timer small{display:block;font-family:var(--font-body);font-size:11px;color:var(--ink-3);text-align:center}
+.instr{min-width:0}
+.instr h3{margin:0 0 4px;font-size:16.5px}
+.instr ol{margin:6px 0 0;padding-inline-start:20px;font-size:14px;color:var(--ink-2);text-align:start}
+.instr ol li{margin:2px 0}
+.bigbtn{width:100%;margin-top:14px;min-height:64px;border-radius:14px;border:0;font-size:19px;font-weight:700;
+  background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation}
+.bigbtn.go{background:var(--cyan);color:#062830}
+.bigbtn.stop{background:var(--red);color:#fff}
+.progress{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:12px}
+.progress i{display:block;height:100%;width:0;background:var(--cyan);transition:width .1s linear}
+
+.chartwrap{position:relative;width:100%;height:190px;direction:ltr}
+.chartwrap.tall{height:240px}
+.chartwrap canvas{position:absolute;inset:0;width:100%;height:100%}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px;color:var(--ink-2);font-size:13.5px;direction:rtl}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 11px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-inline-end:6px}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.ro{background:var(--surface-2);border-radius:10px;padding:7px 10px}
+.ro span{display:block;font-size:11.5px;color:var(--ink-3);font-weight:600}
+.ro b{font-family:var(--font-mono);font-size:15px;font-variant-numeric:tabular-nums;direction:ltr;display:block;text-align:right}
+
+.summary{border-radius:12px;padding:14px;border:1.5px solid var(--line);display:grid;gap:6px;background:var(--surface-2)}
+.summary.ok{border-color:var(--cyan)}
+.summary.warn{border-color:var(--amber)}
+.summary.alert{border-color:var(--red)}
+.summary .headline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.summary .big{font-family:var(--font-mono);font-size:30px;font-weight:600;line-height:1;direction:ltr}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.pill.ok{background:color-mix(in srgb,var(--cyan) 18%,transparent);color:var(--cyan-ink)}
+.pill.warn{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--warn-ink)}
+.pill.alert{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--alert-ink)}
+.tablewrap{overflow-x:auto;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:420px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:end}
+th:first-child,td:first-child{text-align:start}
+thead th{font-size:12px;color:var(--ink-3);font-weight:600}
+td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;direction:ltr}
+.delta-up{color:var(--red)} .delta-down{color:var(--green)}
+.formgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+@media (max-width:520px){.formgrid{grid-template-columns:1fr}}
+textarea{min-height:96px;resize:vertical}
+.demo-flag{font-size:11.5px;font-weight:700;color:var(--warn-ink);background:color-mix(in srgb,var(--amber) 22%,transparent);padding:2px 7px;border-radius:6px}
+.guide{grid-column:1/-1;padding:0;overflow:hidden}
+.guide summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary .q{width:28px;height:28px;border-radius:50%;background:var(--cyan);color:#062830;display:grid;place-items:center;font-weight:700;flex:none}
+.guide summary .chev{margin-inline-start:auto;color:var(--ink-3);font-size:13px;font-weight:600}
+.guide[open] summary .chev::after{content:"הסתרה ▲"} .guide:not([open]) summary .chev::after{content:"הצגה ▼"}
+.guide-body{padding:0 16px 16px;display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.guide-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.guide-body{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.gstep{background:var(--surface-2);border-radius:12px;padding:12px 14px;min-width:0}
+.gstep h4{margin:0 0 6px;font-size:14.5px;display:flex;gap:8px;align-items:center}
+.gstep h4 span{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.gstep ul{margin:0;padding-inline-start:18px;font-size:13.5px;color:var(--ink-2)}
+.gstep li{margin:3px 0}
+.guide-tip{grid-column:1/-1;margin:0}
+footer{max-width:1180px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--ink-3)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
+@media print{
+  header.top,.no-print,footer{display:none!important}
+  body{background:#fff;color:#000}
+  main{display:block}
+  .card{break-inside:avoid;border-color:#ccc;margin-bottom:12px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#06B6D4"/><path d="M4 18h6l3-8 4 15 3-11 2 4h8" fill="none" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><h1>PhysioMotion Lab</h1><small>מעבדה קלינית לניתוח תנועה ונוירולוגיה</small></div>
+    </div>
+    <div class="badges" aria-live="polite">
+      <span class="badge" id="platformBadge"><span class="dot"></span><span>מזהה מכשיר…</span></span>
+      <span class="badge" id="statusBadge"><span class="dot" id="statusDot"></span><span id="statusText">חיישנים כבויים</span></span>
+      <span class="badge mono" id="rateBadge" title="קצב דגימה נמדד" dir="ltr">— Hz</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <details class="card guide" id="guide">
+    <summary><span class="q">?</span>איך משתמשים במעבדה<span class="chev"></span></summary>
+    <div class="guide-body">
+      <div class="gstep"><h4><span>1</span>חיבור החיישן</h4><ul>
+        <li>פותחים את הקישור בטלפון (Safari או Chrome).</li>
+        <li>מקישים <b>"חיבור חיישני המכשיר"</b>. באייפון בוחרים <b>"אפשר"</b>.</li>
+        <li>בראש המסך צריך להופיע <b>"חיישן פעיל"</b> עם נקודה ירוקה, ולידו קצב של 60 Hz בקירוב.</li>
+      </ul></div>
+      <div class="gstep"><h4><span>2</span>בחירת בדיקה</h4><ul>
+        <li><b>בדיקה A (יציבות):</b> טלפון שטוח על עצם החזה בשתי הידיים, רגליים צמודות.</li>
+        <li><b>בדיקה B (רעד):</b> טלפון בכף היד, מסך למעלה, אמה נתמכת.</li>
+        <li>בוחרים את מצב B (האתגור) מהרשימה.</li>
+      </ul></div>
+      <div class="gstep"><h4><span>3</span>הקלטה, עדיף בזוגות</h4><ul>
+        <li>הבודק/ת מקיש/ה <b>"התחלת מצב A"</b>. יש 5 שניות ספירה לאחור להצבת הטלפון.</li>
+        <li>צפצוף ארוך מסמן את תחילת ההקלטה. לא נוגעים במסך עד צפצוף הסיום.</li>
+        <li>חוזרים על אותו תהליך עבור מצב B.</li>
+      </ul></div>
+      <div class="gstep"><h4><span>4</span>תוצאות ודוח</h4><ul>
+        <li>הנתונים נקלטים <b>אוטומטית</b> (כ-60 מדידות בשנייה), בלי ללחוץ על כלום.</li>
+        <li>אחרי מצב B מופיעים מיד הגרפים, המדדים והסיכום האבחנתי.</li>
+        <li>כותבים תצפיות ומסקנה, ומקישים <b>"ייצוא דוח PDF"</b>.</li>
+      </ul></div>
+      <p class="note guide-tip">הנתונים נשמרים רק בטלפון ולא נשלחים לשום מקום. רענון הדף מוחק את ההקלטות (ההערות הכתובות נשמרות). אם הנבדק/ת זז/ה או נגע/ה במסך, מקישים "חזרה על A" או "חזרה על B". אין טלפון זמין? הפעילו "הדמיית נתוני חיישן" או "טעינת הקלטות הדגמה".</p>
+    </div>
+  </details>
+  <div class="col">
+    <section class="card no-print" aria-labelledby="sensH">
+      <div class="eyebrow">חיבור חיישן</div>
+      <h2 id="sensH">חיבור חיישן התנועה</h2>
+      <div class="sensorbar" style="margin-top:10px">
+        <button class="btn primary" id="connectBtn" type="button">חיבור חיישני המכשיר</button>
+        <label class="switch"><input type="checkbox" id="simToggle"> הדמיית נתוני חיישן</label>
+        <label class="fld" id="simProfileWrap" hidden>נבדק מדומה
+          <select id="simProfile">
+            <option value="healthy">נבדק בריא (ביקורת)</option>
+            <option value="impaired">אטקסיה / שכרות</option>
+            <option value="parkinson">רעד מנוחה פרקינסוני (4–6 Hz)</option>
+            <option value="enhanced">רעד פיזיולוגי מוגבר (8–12 Hz)</option>
+          </select>
+        </label>
+      </div>
+      <p class="note" id="sensorNote" style="margin-top:10px">בטלפון, הקישו <b>חיבור חיישני המכשיר</b>. באייפון תופיע בקשת הרשאה לגישה לתנועה וכיוון. במחשב, הפעילו <b>הדמיית נתוני חיישן</b>.</p>
+    </section>
+
+    <section class="card" aria-labelledby="protoH">
+      <div class="eyebrow">פרוטוקול</div>
+      <h2 id="protoH">בחירת בדיקה</h2>
+      <div class="protos" style="margin-top:10px">
+        <button class="proto" type="button" data-proto="sway" aria-pressed="true">
+          <span class="tag">בדיקה A · ‏2 × 30 שניות</span>
+          <b>יציבות יציבתית ואטקסיה</b>
+          <span>פרוטוקול רומברג / פגיעה תפקודית. אלכוהול, חוש מנח (פרופריוספציה), תפקוד וסטיבולרי וצרבלרי.</span>
+        </button>
+        <button class="proto" type="button" data-proto="tremor" aria-pressed="false">
+          <span class="tag">בדיקה B · ‏2 × 15 שניות</span>
+          <b>הערכת רעד</b>
+          <span>רעד מנוחה פרקינסוני (3–6 Hz) לעומת רעד פיזיולוגי (8–12 Hz).</span>
+        </button>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label class="fld">מצב B (אתגור)
+          <select id="variantSel"></select>
+        </label>
+        <label class="fld">משך כל שלב
+          <select id="durSel"><option value="std">רגיל</option><option value="quick">הדגמה מהירה (10 שניות)</option></select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="testH">
+      <div class="eyebrow" id="testEyebrow">בדיקה שלב אחר שלב</div>
+      <h2 id="testH">נדנוד יציבתי</h2>
+      <div class="phases">
+        <div class="phase" id="phaseA"><span class="st" id="phaseASt">ממתין</span><b>מצב A</b><span id="phaseALbl">בסיס</span></div>
+        <div class="phase" id="phaseB"><span class="st" id="phaseBSt">ממתין</span><b>מצב B</b><span id="phaseBLbl">אתגור</span></div>
+      </div>
+      <div class="stage">
+        <div class="target" aria-hidden="true">
+          <canvas id="targetCv" width="300" height="300"></canvas>
+          <div class="timer"><div><span id="timerVal">30</span><small id="timerLbl">שניות</small></div></div>
+        </div>
+        <div class="instr" aria-live="polite">
+          <h3 id="instrTitle"></h3>
+          <p class="sub" id="instrSub"></p>
+          <ol id="instrSteps"></ol>
+        </div>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="progBar"></i></div>
+      <button class="bigbtn go" id="startBtn" type="button">▶ התחלת מצב A</button>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="redoA" type="button" disabled>חזרה על A</button>
+        <button class="btn" id="redoB" type="button" disabled>חזרה על B</button>
+        <span class="spacer"></span>
+        <button class="btn" id="demoBtn" type="button" title="מילוי שני המצבים בהקלטות סינתטיות">טעינת הקלטות הדגמה</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="liveH">
+      <div class="row"><div><div class="eyebrow">אות חי</div><h2 id="liveH">תאוצה מנוכת כבידה</h2></div><span class="spacer"></span>
+        <div class="legend"><span><i style="background:var(--trace-a)"></i><span class="ltr">|A| − 9.81</span></span><span><i style="background:var(--ink-3)"></i>תאוצה דינמית (מסנן מעביר גבוהים)</span></div></div>
+      <p class="sub" style="margin-top:4px"><span class="mono ltr">|A| = √(x² + y² + z²) − 9.81 m/s²</span> · 6 השניות האחרונות</p>
+      <div class="chartwrap" style="margin-top:8px"><canvas id="liveCv"></canvas><div class="empty" id="liveEmpty">אין עדיין אות. חברו את החיישנים או הפעילו את ההדמיה.</div></div>
+      <div class="readouts">
+        <div class="ro"><span>|A| − g</span><b id="roMag">—</b></div>
+        <div class="ro"><span>RMS דינמי (2 ש׳)</span><b id="roRms">—</b></div>
+        <div class="ro"><span>דגימות</span><b id="roN">0</b></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="card" aria-labelledby="cmpH">
+      <div class="row"><div><div class="eyebrow">השוואת שני עקומים <span class="demo-flag" id="demoFlag" hidden>נתוני הדגמה</span></div><h2 id="cmpH">מצב A מול מצב B</h2></div><span class="spacer"></span>
+        <div class="seg" role="group" aria-label="תצוגת גרף"><button type="button" data-view="time" aria-pressed="true">ציר זמן</button><button type="button" data-view="freq" aria-pressed="false">ספקטרום</button></div></div>
+      <div class="legend" style="margin-top:8px"><span><i style="background:var(--trace-a)"></i><span id="lgA">מצב A (בסיס)</span></span><span><i style="background:var(--trace-b)"></i><span id="lgB">מצב B (בדיקה)</span></span></div>
+      <div class="chartwrap tall" style="margin-top:8px"><canvas id="cmpCv"></canvas><div class="empty" id="cmpEmpty">הקליטו את שני המצבים, או הקישו <b>&nbsp;טעינת הקלטות הדגמה&nbsp;</b> כדי לראות דוגמה פתורה.</div></div>
+      <p class="sub" id="cmpCaption" style="margin-top:6px"></p>
+    </section>
+
+    <section class="card" aria-labelledby="statH">
+      <div class="eyebrow">מדדים קליניים</div>
+      <h2 id="statH">תוצאות</h2>
+      <div id="summary" class="summary" style="margin-top:10px"></div>
+      <div class="tablewrap"><table id="statTable"><thead><tr><th>מדד</th><th>מצב A</th><th>מצב B</th><th>שינוי</th></tr></thead><tbody></tbody></table></div>
+      <p class="sub" style="margin-top:8px;font-size:12.5px">המדדים מחושבים מווקטור התאוצה הדינמי לאחר סינון וניכוי כבידה, ולכן אינם תלויים באופן אחיזת הטלפון. ערכי ההעתק (מ״מ) הם הערכה מאינטגרציה כפולה.</p>
+    </section>
+
+    <section class="card" aria-labelledby="repH">
+      <div class="eyebrow">דוח</div>
+      <h2 id="repH">רשומות קליניות של הסטודנט/ית</h2>
+      <div class="formgrid" style="margin-top:10px">
+        <label class="fld">שם הסטודנט/ית<input type="text" id="stName" autocomplete="name" placeholder="לדוגמה: נועה כהן"></label>
+        <label class="fld">מספר סטודנט<input type="text" id="stId" placeholder="לדוגמה: 203456789"></label>
+        <label class="fld">נבדק / תרחיש<input type="text" id="stSubject" placeholder="לדוגמה: עמית מתנדב, לאחר מאמץ"></label>
+        <label class="fld">מיקום המכשיר<input type="text" id="stPos" placeholder="לדוגמה: מוחזק שטוח על עצם החזה"></label>
+      </div>
+      <label class="fld" style="margin-top:10px">תצפיות קליניות<textarea id="stObs" placeholder="נדנוד נראה לעין, צעדי תיקון, שימוש בידיים, אופי הרעד (מנוחה / יציבתי / כוונה)…"></textarea></label>
+      <label class="fld" style="margin-top:10px">מסקנה אבחנתית<textarea id="stConc" placeholder="פרשו את יחס רומברג או את תדר הרעד הדומיננטי, וקשרו למנגנון הסביר…"></textarea></label>
+      <button class="bigbtn" id="pdfBtn" type="button" style="min-height:56px;font-size:17px">⬇ ייצוא דוח אבחנתי ל-PDF</button>
+    </section>
+  </div>
+</main>
+<footer>PhysioMotion Lab הוא סימולטור לימודי לתרגול חשיבה קלינית. אינו מכשיר רפואי ואין להשתמש בו לאבחון.</footer>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (id) => document.getElementById(id);
+const G = 9.81;
+// טווחי מספרים כמו "3–6 Hz" מתהפכים בתוך טקסט עברי; סימן LRM לפני כל מספר שומר על הסדר
+const bidi = (s) => String(s).replace(/(^|[^\d.‎])(\d)/g, '$1‎$2');
+function fixBidiDom(root = document.body) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => /SCRIPT|STYLE|TEXTAREA/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(n => { if (/\d/.test(n.nodeValue)) { const v = bidi(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; } });
+}
+
+/* ---------- הגדרות פרוטוקולים ---------- */
+const PROTOCOLS = {
+  sway: {
+    title: 'נדנוד יציבתי ואטקסיה', short: 'בדיקה A', dur: 30,
+    a: { label: 'בסיס · עיניים פקוחות', title: 'מצב A · בסיס (עיניים פקוחות, רגליים צמודות)',
+      sub: 'יציבות ייחוס עם קלט ראייה מלא.',
+      steps: ['עמדו יחפים, רגליים צמודות, ידיים רפויות.', 'החזיקו את הטלפון שטוח על עצם החזה בשתי הידיים.', 'קבעו מבט על נקודה בגובה העיניים במרחק 2 מטר.', 'עמדו ללא תזוזה עד הצפצוף המסיים.'] },
+    variants: [
+      { id: 'eyes_closed', label: 'עיניים עצומות (רומברג)', sub: 'מנטרל את הראייה. עלייה חדה בנדנוד מרמזת על פגיעה פרופריוספטיבית או וסטיבולרית.', steps: ['אותה עמידה ואותו מיקום טלפון כמו במצב A.', 'עצמו עיניים בסוף הספירה לאחור.', 'בודק/ת עומד/ת קרוב לשמירה מפני נפילה.', 'פקחו עיניים בצפצוף המסיים.'] },
+      { id: 'tandem', label: 'עמידת טנדם (עקב-בוהן)', sub: 'מצמצם את בסיס התמיכה ומעמיס על בקרת שיווי המשקל הצרבלרית.', steps: ['הציבו עקב אחת ישירות לפני בהונות הרגל השנייה.', 'החזיקו את הטלפון על עצם החזה.', 'עיניים פקוחות, מבט לנקודה הקבועה.', 'החזיקו את העמידה עד הצפצוף המסיים.'] },
+      { id: 'intox', label: 'בדיקת שכרות / פגיעה תפקודית', sub: 'פגיעה מדומה (משקפי עייפות, חוסר שינה) או תרחיש הוראה מפוקח של בדיקת פיכחון.', steps: ['הפעילו את מצב הפגיעה שהגדיר/ה המדריך/ה.', 'רגליים צמודות, טלפון על עצם החזה.', 'עיניים עצומות אם המדריך/ה מורה.', 'החזיקו עד הצפצוף. בודק/ת שומר/ת מפני נפילה.'] },
+      { id: 'post_ex', label: 'לאחר מאמץ / עייפות', sub: 'חזרה מיד לאחר 60 שניות של סקוואטים או עליית מדרגות.', steps: ['בצעו את המאמץ שהגדיר/ה המדריך/ה.', 'חזרו מיד לעמידה ברגליים צמודות.', 'טלפון על עצם החזה, מבט לנקודה הקבועה.', 'החזיקו עד הצפצוף המסיים.'] }
+    ]
+  },
+  tremor: {
+    title: 'הערכת רעד', short: 'בדיקה B', dur: 15,
+    a: { label: 'יד במנוחה', title: 'מצב A · יד במנוחה (נתמכת)',
+      sub: 'היד נתמכת במלואה, לרישום רעד פיזיולוגי בסיסי.',
+      steps: ['שבו עם האמה מונחת על שולחן או על הירכיים.', 'החזיקו את הטלפון בכף היד, מסך למעלה, אצבעות רפויות.', 'אל תלחצו חזק. נשמו כרגיל.', 'הישארו רפויים עד הצפצוף המסיים.'] },
+    variants: [
+      { id: 'extended', label: 'יד מושטת (רעד יציבתי)', sub: 'רעד יציבתי. רעד פיזיולוגי מוגבר ורעד עצמוני (Essential) מתגברים כאן.', steps: ['הרימו את היד ישר קדימה לגובה הכתף.', 'החזיקו את הטלפון שטוח בכף היד.', 'השאירו את היד מושטת עד הצפצוף המסיים.'] },
+      { id: 'fatigue', label: 'לאחר עייפות שרירית', sub: 'חזרה לאחר 60 שניות של אחיזה ממושכת או שכיבות סמיכה לקיר.', steps: ['בצעו את משימת העייפות שהגדיר/ה המדריך/ה.', 'החזיקו את הטלפון בכף היד עם יד מושטת.', 'החזיקו עד הצפצוף המסיים.'] },
+      { id: 'caffeine', label: 'לאחר קפאין / עומס קוגניטיבי', sub: 'לאחר שתיית קפאין, או תוך כדי חיסור סדרתי של 7 בקול.', steps: ['החזיקו את הטלפון בכף היד, אמה נתמכת.', 'ספרו לאחור מ-100 בקפיצות של 7, בקול.', 'המשיכו עד הצפצוף המסיים.'] },
+      { id: 'pd_rest', label: 'מנוחה פרקינסונית (חולה מדומה)', sub: 'יד במנוחה מלאה, עם הסחת דעת. רעד "גלגול גלולות" קלאסי מופיע במנוחה.', steps: ['הניחו את האמה על הירכיים, טלפון בכף יד רפויה.', 'עצמו עיניים ומנו את חודשי השנה בסדר הפוך.', 'אל תנסו בכוונה להחזיק את היד יציבה.', 'המשיכו עד הצפצוף המסיים.'] }
+    ]
+  }
+};
+
+/* ---------- מצב ---------- */
+const S = {
+  proto: 'sway', variant: 'eyes_closed', quick: false,
+  phase: 'A', mode: 'idle',
+  rec: { A: null, B: null }, res: { A: null, B: null }, demo: false,
+  source: 'none', live: [], lastSampleAt: 0, nSamples: 0, rateTimes: [],
+  gSlow: null, rFast: [0, 0, 0], view: 'time', curRec: null, recStart: 0, recDur: 0
+};
+
+/* ---------- זיהוי פלטפורמה ---------- */
+const ua = navigator.userAgent;
+const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(ua);
+const platform = isIOS ? 'iOS' : isAndroid ? 'Android' : 'Desktop';
+const platformHe = isIOS ? 'iOS' : isAndroid ? 'Android' : 'מחשב · מצב סימולטור';
+$('platformBadge').innerHTML = `<span class="dot" style="background:#94A3B8"></span><span>${platformHe}</span>`;
+
+function setStatus(kind, text) {
+  $('statusDot').className = 'dot ' + (kind === 'live' ? 'live' : kind === 'sim' ? 'sim' : kind === 'err' ? 'err' : '');
+  $('statusText').textContent = text;
+}
+function note(html, kind) { const n = $('sensorNote'); n.innerHTML = html; n.className = 'note' + (kind ? ' ' + kind : ''); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 3500); }
+
+if (!window.isSecureContext) {
+  note('הדף אינו נטען בחיבור מאובטח (https://), ולכן הטלפון יחסום את חיישני התנועה. ארחו את הקובץ ב-HTTPS, או השתמשו ב<b>הדמיית נתוני חיישן</b>.', 'warn');
+}
+
+/* ---------- שמע ---------- */
+let actx = null;
+function initAudio() {
+  if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+  try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+}
+function beep(freq = 880, dur = 0.12, vol = 0.25) {
+  if (!actx) return;
+  const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+  try { navigator.vibrate && navigator.vibrate(Math.round(dur * 400)); } catch (e) {}
+}
+
+/* ---------- מטפל חיישנים אוניברסלי (iOS / Android) ---------- */
+let watchdog = null, motionBound = false;
+function onMotion(e) {
+  const a = e.accelerationIncludingGravity;
+  if (!a || a.x == null || a.y == null || a.z == null) return;
+  if (S.source !== 'device') return;
+  ingest(performance.now() / 1000, a.x, a.y, a.z);
+}
+async function connectDevice() {
+  initAudio();
+  if (typeof DeviceMotionEvent === 'undefined') {
+    setStatus('err', 'אין API תנועה'); note('לדפדפן זה אין ממשק לחיישני תנועה. הפעילו <b>הדמיית נתוני חיישן</b> כדי להמשיך.', 'err'); return false;
+  }
+  if (!window.isSecureContext) {
+    setStatus('err', 'נדרש HTTPS'); note('חיישני תנועה פועלים רק בדפי https:// (או localhost). פתחו את האפליקציה מכתובת מאובטחת, או השתמשו בהדמיה.', 'err'); return false;
+  }
+  // iOS 13+: יש לבקש הרשאה בתוך אירוע ההקשה, לפני כל await אחר
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const r = await DeviceMotionEvent.requestPermission();
+      if (r !== 'granted') { setStatus('err', 'ההרשאה נדחתה'); note('הגישה לתנועה נדחתה. באייפון, סגרו ופתחו מחדש את הדף, הקישו שוב על חיבור ובחרו <b>אפשר</b>.', 'err'); return false; }
+    } catch (err) { setStatus('err', 'שגיאת הרשאה'); note('iOS לא הצליח לבקש גישה לתנועה: ' + err.message, 'err'); return false; }
+  }
+  if (!motionBound) { window.addEventListener('devicemotion', onMotion); motionBound = true; }
+  stopSim(); $('simToggle').checked = false; $('simProfileWrap').hidden = true;
+  S.source = 'device'; resetLive();
+  setStatus('', 'ממתין לנתונים…');
+  clearTimeout(watchdog);
+  const before = S.nSamples;
+  watchdog = setTimeout(() => {
+    if (S.source === 'device' && S.nSamples === before) {
+      setStatus('err', 'אין נתוני חיישן'); note('החיבור הצליח, אך לא התקבלו נתוני תנועה. ייתכן שאין במכשיר מד תאוצה (נפוץ במחשבים). הפעילו <b>הדמיית נתוני חיישן</b>.', 'warn');
+    }
+  }, 2000);
+  note(`החיישנים מחוברים (${platform}). השאירו את המסך דולק במהלך הבדיקה.`);
+  return true;
+}
+$('connectBtn').addEventListener('click', connectDevice);
+
+/* ---------- סימולטור ---------- */
+let simTimer = null, simT = 0, simSeed = makeSimSeed();
+function makeSimSeed() { return Array.from({ length: 12 }, () => Math.random() * Math.PI * 2); }
+function randn() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function simAccel(t, proto, phase, profile, ph) {
+  // מחזיר accelerationIncludingGravity עבור טלפון המוחזק בערך שטוח
+  let tx = 0, ty = 0, lin = [0, 0, 0];
+  const n = 0.018;
+  if (proto === 'sway') {
+    let k = 1;
+    if (phase === 'B') k = profile === 'impaired' ? 3.6 : profile === 'healthy' ? 1.55 : 1.9;
+    const base = 0.006 * k;
+    tx = base * (Math.sin(2 * Math.PI * 0.35 * t + ph[0]) + 0.6 * Math.sin(2 * Math.PI * 0.8 * t + ph[1]) + 0.3 * Math.sin(2 * Math.PI * 1.4 * t + ph[2]));
+    ty = base * (0.8 * Math.sin(2 * Math.PI * 0.28 * t + ph[3]) + 0.5 * Math.sin(2 * Math.PI * 0.95 * t + ph[4]));
+    if (phase === 'B' && profile === 'impaired') { tx += 0.02 * Math.sin(2 * Math.PI * 0.18 * t + ph[5]); ty += 0.012 * Math.sin(2 * Math.PI * 0.6 * t + ph[6]); }
+    const w = 2 * Math.PI * 0.5;
+    lin = [-w * w * tx * 0.9, -w * w * ty * 0.9, 0.35 * k * 0.03 * Math.sin(2 * Math.PI * 1.1 * t + ph[7])];
+  } else {
+    let amp = 0.04, f = 9.6 + 0.6 * Math.sin(ph[0]), extra = 0;
+    if (phase === 'B') {
+      if (profile === 'parkinson') { amp = 0.85 * (0.75 + 0.25 * Math.sin(0.5 * t + ph[1])); f = 4.8 + 0.25 * Math.sin(ph[2]); }
+      else if (profile === 'enhanced') { amp = 0.34; f = 10.4 + 0.5 * Math.sin(ph[2]); }
+      else if (profile === 'impaired') { amp = 0.16; f = 9.2; extra = 0.12 * Math.sin(2 * Math.PI * 2.4 * t + ph[3]); }
+      else { amp = 0.075; }
+    }
+    const s = amp * Math.sin(2 * Math.PI * f * t + ph[4]) + extra;
+    const dir = [0.35, 0.45, 0.82];
+    lin = [dir[0] * s, dir[1] * s, dir[2] * s];
+    tx = 0.004 * Math.sin(2 * Math.PI * 0.2 * t + ph[5]); ty = 0.004 * Math.sin(2 * Math.PI * 0.25 * t + ph[6]);
+  }
+  return [
+    G * Math.sin(tx) + lin[0] + n * randn(),
+    G * Math.sin(ty) + lin[1] + n * randn(),
+    G * Math.cos(tx) * Math.cos(ty) + lin[2] + n * randn()
+  ];
+}
+function startSim() {
+  stopSim();
+  S.source = 'sim'; resetLive();
+  simT = 0; simSeed = makeSimSeed();
+  const fs = 60;
+  simTimer = setInterval(() => {
+    const prof = $('simProfile').value;
+    for (let i = 0; i < 2; i++) { // 2 דגימות לכל 33 מ״ש = 60 Hz
+      simT += 1 / fs;
+      const a = simAccel(simT, S.proto, S.phase, prof, simSeed);
+      ingest(performance.now() / 1000 - (1 - i) / fs, a[0], a[1], a[2]);
+    }
+  }, 1000 / 30);
+  setStatus('sim', 'סימולטור');
+  note('הסימולטור פעיל. נתוני מד תאוצה סינתטיים ב-60 Hz לפי פרופיל הנבדק שנבחר. מצב A נרשם תמיד כבסיס; הפרופיל קובע את מצב B.', 'warn');
+}
+function stopSim() { if (simTimer) clearInterval(simTimer); simTimer = null; }
+$('simToggle').addEventListener('change', (e) => {
+  initAudio();
+  $('simProfileWrap').hidden = !e.target.checked;
+  if (e.target.checked) startSim();
+  else { stopSim(); S.source = 'none'; setStatus('', 'חיישנים כבויים'); resetLive(); note('ההדמיה כבויה. בטלפון, הקישו <b>חיבור חיישני המכשיר</b>.'); }
+});
+$('simProfile').addEventListener('change', () => { simSeed = makeSimSeed(); });
+
+/* ---------- קליטת דגימות ועיבוד חי ---------- */
+function resetLive() { S.live = []; S.nSamples = 0; S.rateTimes = []; S.gSlow = null; S.rFast = [0, 0, 0]; $('liveEmpty').hidden = false; }
+function ingest(t, x, y, z) {
+  S.nSamples++;
+  const mag = Math.sqrt(x * x + y * y + z * z) - G;
+  const dt = S.lastSampleAt ? Math.min(0.1, Math.max(0.001, t - S.lastSampleAt)) : 1 / 60;
+  S.lastSampleAt = t;
+  if (!S.gSlow) S.gSlow = [x, y, z];
+  const as = dt / (2 + dt);
+  S.gSlow = [S.gSlow[0] + as * (x - S.gSlow[0]), S.gSlow[1] + as * (y - S.gSlow[1]), S.gSlow[2] + as * (z - S.gSlow[2])];
+  const d = [x - S.gSlow[0], y - S.gSlow[1], z - S.gSlow[2]];
+  const af = 0.35;
+  S.rFast = [S.rFast[0] + af * (d[0] - S.rFast[0]), S.rFast[1] + af * (d[1] - S.rFast[1]), S.rFast[2] + af * (d[2] - S.rFast[2])];
+  const dyn = Math.hypot(d[0], d[1], d[2]);
+  S.live.push({ t, mag, dyn });
+  while (S.live.length && t - S.live[0].t > 6) S.live.shift();
+  S.rateTimes.push(t); if (S.rateTimes.length > 120) S.rateTimes.shift();
+  if (S.mode === 'recording' && S.curRec) { S.curRec.t.push(t); S.curRec.x.push(x); S.curRec.y.push(y); S.curRec.z.push(z); }
+  if (S.source === 'device' && S.nSamples === 1) setStatus('live', 'חיישן פעיל');
+}
+
+/* ---------- ציור גרפים ---------- */
+function niceStep(range, target) {
+  const raw = range / Math.max(1, target), p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+  return (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p;
+}
+function fmtTick(v, step) { const dec = Math.max(0, -Math.floor(Math.log10(step) + 1e-9)); return v.toFixed(Math.min(3, dec)); }
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function screenPalette() { return { bg: cssVar('--surface'), grid: cssVar('--grid'), ink: cssVar('--ink-2'), ink3: cssVar('--ink-3') }; }
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = Math.min(3, window.devicePixelRatio || 1);
+  const w = Math.max(10, Math.round(r.width * dpr)), h = Math.max(10, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { w: r.width, h: r.height, dpr };
+}
+function drawChart(ctx, W, H, opt, pal, ox = 0, oy = 0) {
+  const mono = '"IBM Plex Mono", ui-monospace, monospace', heb = '"IBM Plex Sans Hebrew", Arial, sans-serif';
+  ctx.save(); ctx.translate(ox, oy); ctx.direction = 'ltr';
+  if (pal.fill) { ctx.fillStyle = pal.bg; ctx.fillRect(0, 0, W, H); } else ctx.clearRect(0, 0, W, H);
+  const fs = opt.fs || 10;
+  const L = opt.padL ?? 46, R = 10, T = 10, B = opt.xLabel ? fs * 3.2 : fs * 2.2;
+  const pw = W - L - R, ph = H - T - B;
+  let [x0, x1] = opt.xRange, [y0, y1] = opt.yRange;
+  if (y1 - y0 < 1e-9) { y0 -= 1; y1 += 1; }
+  const X = (v) => L + (v - x0) / (x1 - x0) * pw, Y = (v) => T + (1 - (v - y0) / (y1 - y0)) * ph;
+  ctx.font = `${fs}px ${mono}`; ctx.lineWidth = Math.max(1, fs / 10);
+  const ys = niceStep(y1 - y0, opt.yTicks || 4);
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let v = Math.ceil(y0 / ys) * ys; v <= y1 + 1e-9; v += ys) {
+    ctx.strokeStyle = pal.grid; ctx.beginPath(); ctx.moveTo(L, Math.round(Y(v)) + .5); ctx.lineTo(L + pw, Math.round(Y(v)) + .5); ctx.stroke();
+    ctx.fillStyle = pal.ink3; ctx.fillText(fmtTick(Math.abs(v) < ys / 1e6 ? 0 : v, ys), L - 6, Y(v));
+  }
+  const xs = niceStep(x1 - x0, opt.xTicks || 6);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (let v = Math.ceil(x0 / xs) * xs; v <= x1 + 1e-9; v += xs) {
+    ctx.strokeStyle = pal.grid; ctx.beginPath(); ctx.moveTo(Math.round(X(v)) + .5, T); ctx.lineTo(Math.round(X(v)) + .5, T + ph); ctx.stroke();
+    ctx.fillStyle = pal.ink3; ctx.fillText(fmtTick(v, xs), X(v), T + ph + 5);
+  }
+  if (opt.bands) for (const b of opt.bands) {
+    ctx.fillStyle = b.color; ctx.fillRect(X(Math.max(x0, b.from)), T, X(Math.min(x1, b.to)) - X(Math.max(x0, b.from)), ph);
+    ctx.fillStyle = pal.ink3; ctx.font = `${fs}px ${heb}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(bidi(b.label), (X(b.from) + X(b.to)) / 2, T + 3);
+  }
+  ctx.font = `${fs}px ${heb}`;
+  if (opt.xLabel) { ctx.fillStyle = pal.ink; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(opt.xLabel, L + pw, H - 1); }
+  if (opt.yLabel) { ctx.fillStyle = pal.ink; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(opt.yLabel, L, H - 1); }
+  ctx.save(); ctx.beginPath(); ctx.rect(L, T, pw, ph); ctx.clip();
+  for (const s of opt.series) {
+    if (!s.x.length) continue;
+    if (s.area) {
+      ctx.beginPath(); ctx.moveTo(X(s.x[0]), Y(Math.max(y0, 0)));
+      for (let i = 0; i < s.x.length; i++) ctx.lineTo(X(s.x[i]), Y(s.y[i]));
+      ctx.lineTo(X(s.x[s.x.length - 1]), Y(Math.max(y0, 0))); ctx.closePath();
+      ctx.globalAlpha = 0.14; ctx.fillStyle = s.color; ctx.fill(); ctx.globalAlpha = 1;
+    }
+    ctx.beginPath(); ctx.strokeStyle = s.color; ctx.lineWidth = (s.width || 1.5) * (fs / 10); ctx.lineJoin = 'round';
+    const step = Math.max(1, Math.floor(s.x.length / (pw * 1.5)));
+    for (let i = 0; i < s.x.length; i += step) { const px = X(s.x[i]), py = Y(s.y[i]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.strokeStyle = pal.grid; ctx.lineWidth = 1; ctx.strokeRect(L + .5, T + .5, pw - 1, ph - 1);
+  ctx.restore();
+}
+
+/* ---------- לולאת תצוגה חיה ---------- */
+const liveCv = $('liveCv'), targetCv = $('targetCv');
+function renderLive() {
+  const { w, h, dpr } = fitCanvas(liveCv);
+  const ctx = liveCv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const pal = screenPalette(), L = S.live;
+  if (L.length > 1) {
+    $('liveEmpty').hidden = true;
+    const tEnd = L[L.length - 1].t, xs = L.map(p => p.t - tEnd + 6);
+    let mx = 0.2; for (const p of L) mx = Math.max(mx, Math.abs(p.mag), p.dyn);
+    mx = Math.min(mx * 1.15, 20);
+    drawChart(ctx, w, h, { xRange: [0, 6], yRange: [-mx, mx], series: [
+      { x: xs, y: L.map(p => p.dyn), color: pal.ink3, width: 1 },
+      { x: xs, y: L.map(p => p.mag), color: cssVar('--trace-a'), width: 1.8 }
+    ], xTicks: 6, yLabel: 'm/s²', xLabel: 'שניות' }, pal);
+    const last = L[L.length - 1];
+    $('roMag').textContent = (last.mag >= 0 ? '+' : '') + last.mag.toFixed(3);
+    let ss = 0, c = 0; for (let i = L.length - 1; i >= 0 && tEnd - L[i].t < 2; i--) { ss += L[i].dyn * L[i].dyn; c++; }
+    $('roRms').textContent = Math.sqrt(ss / Math.max(1, c)).toFixed(3);
+  } else ctx.clearRect(0, 0, w, h);
+  renderTarget();
+  requestAnimationFrame(renderLive);
+}
+// תזמון הבדיקה רץ על שעון נפרד כדי שימשיך גם כשהאנימציה מואטת
+setInterval(() => { if (S.mode === 'recording') tickRecording(); }, 100);
+setInterval(() => {
+  $('roN').textContent = S.nSamples.toLocaleString('he-IL');
+  const rt = S.rateTimes;
+  $('rateBadge').textContent = (rt.length > 10 && performance.now() / 1000 - rt[rt.length - 1] < 1) ? Math.round((rt.length - 1) / (rt[rt.length - 1] - rt[0])) + ' Hz' : '— Hz';
+}, 500);
+let bub = [0, 0];
+function renderTarget() {
+  const ctx = targetCv.getContext('2d'), W = 300, c = W / 2, pal = screenPalette();
+  ctx.clearRect(0, 0, W, W); ctx.lineWidth = 2;
+  [138, 96, 54].forEach((r, i) => { ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2); ctx.strokeStyle = i === 2 ? cssVar('--cyan') : pal.grid; ctx.stroke(); });
+  ctx.strokeStyle = pal.grid; ctx.beginPath(); ctx.moveTo(c, 10); ctx.lineTo(c, W - 10); ctx.moveTo(10, c); ctx.lineTo(W - 10, c); ctx.stroke();
+  if (S.mode === 'recording') {
+    const p = (performance.now() / 1000 - S.recStart) / S.recDur;
+    ctx.beginPath(); ctx.arc(c, c, 138, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, p)); ctx.strokeStyle = cssVar('--cyan'); ctx.lineWidth = 6; ctx.stroke();
+  }
+  // בועה: השארית מוטלת על שני צירים הניצבים לכבידה
+  if (S.gSlow) {
+    const g = S.gSlow, gn = Math.hypot(g[0], g[1], g[2]) || 1, gh = [g[0] / gn, g[1] / gn, g[2] / gn];
+    let u = Math.abs(gh[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0];
+    const dot = u[0] * gh[0] + u[1] * gh[1] + u[2] * gh[2];
+    u = [u[0] - dot * gh[0], u[1] - dot * gh[1], u[2] - dot * gh[2]]; const un = Math.hypot(...u); u = u.map(v => v / un);
+    const v = [gh[1] * u[2] - gh[2] * u[1], gh[2] * u[0] - gh[0] * u[2], gh[0] * u[1] - gh[1] * u[0]];
+    const r = S.rFast, k = 260;
+    const tx = (r[0] * u[0] + r[1] * u[1] + r[2] * u[2]) * k, ty = (r[0] * v[0] + r[1] * v[1] + r[2] * v[2]) * k;
+    bub = [bub[0] + 0.4 * (tx - bub[0]), bub[1] + 0.4 * (ty - bub[1])];
+    const bx = c + Math.max(-130, Math.min(130, bub[0])), by = c + Math.max(-130, Math.min(130, bub[1]));
+    const off = Math.hypot(bx - c, by - c);
+    ctx.beginPath(); ctx.arc(bx, by, 13, 0, Math.PI * 2);
+    ctx.fillStyle = off < 54 ? cssVar('--cyan') : off < 96 ? cssVar('--amber') : cssVar('--red');
+    ctx.globalAlpha = .85; ctx.fill(); ctx.globalAlpha = 1;
+  }
+}
+
+/* ---------- זרימת הבדיקה ---------- */
+let wakeLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && 'wakeLock' in navigator && !wakeLock) wakeLock = await navigator.wakeLock.request('screen');
+    if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch (e) { wakeLock = null; }
+}
+const proto = () => PROTOCOLS[S.proto];
+const variant = () => proto().variants.find(v => v.id === S.variant) || proto().variants[0];
+const phaseDur = () => S.quick ? 10 : proto().dur;
+
+function renderProtocol() {
+  const P = proto();
+  document.querySelectorAll('.proto').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.proto === S.proto)));
+  const sel = $('variantSel'); sel.innerHTML = P.variants.map(v => `<option value="${v.id}">${v.label}</option>`).join('');
+  if (!P.variants.some(v => v.id === S.variant)) S.variant = P.variants[0].id;
+  sel.value = S.variant;
+  $('testEyebrow').textContent = `${P.short} · פרוטוקול שלב אחר שלב`;
+  $('testH').textContent = P.title;
+  $('phaseALbl').textContent = P.a.label; $('phaseBLbl').textContent = variant().label;
+  $('lgA').textContent = `מצב A (${P.a.label})`; $('lgB').textContent = `מצב B (${variant().label})`;
+  renderTestCard();
+}
+function renderTestCard() {
+  const P = proto(), V = variant(), A = S.phase === 'A';
+  const info = A ? { title: P.a.title, sub: P.a.sub, steps: P.a.steps } : { title: 'מצב B · ' + V.label, sub: V.sub, steps: V.steps };
+  const both = S.rec.A && S.rec.B, fin = both && S.mode === 'idle';
+  $('instrTitle').textContent = fin ? 'שני המצבים נרשמו' : info.title;
+  $('instrSub').textContent = fin ? 'עברו על ההשוואה והמדדים, ואז כתבו את הממצאים. אפשר לחזור על כל מצב לשיפור הדיוק.' : info.sub;
+  $('instrSteps').innerHTML = fin ? '' : info.steps.map(s => `<li>${s}</li>`).join('');
+  $('phaseA').className = 'phase' + (S.rec.A ? ' done' : '') + (A && !both ? ' active' : '');
+  $('phaseB').className = 'phase' + (S.rec.B ? ' done' : '') + (!A && !both ? ' active' : '');
+  $('phaseASt').textContent = S.rec.A ? '✓ נרשם' : A && S.mode === 'recording' ? '● מקליט' : 'ממתין';
+  $('phaseBSt').textContent = S.rec.B ? '✓ נרשם' : !A && S.mode === 'recording' ? '● מקליט' : 'ממתין';
+  const btn = $('startBtn');
+  if (S.mode === 'idle') {
+    btn.className = 'bigbtn go';
+    btn.textContent = both ? '↻ הרצת הבדיקה מחדש' : `▶ התחלת מצב ${S.phase}`;
+    $('timerVal').textContent = phaseDur(); $('timerLbl').textContent = 'שניות'; $('progBar').style.width = '0%';
+  } else { btn.className = 'bigbtn stop'; btn.textContent = '■ ביטול'; }
+  $('redoA').disabled = S.mode !== 'idle' || !S.rec.A; $('redoB').disabled = S.mode !== 'idle' || !S.rec.B;
+  if (S.mode !== 'recording') fixBidiDom($('testH').closest('.card'));
+}
+
+let cdTimer = null;
+const COUNTDOWN = 5; // זמן להקיש ולהציב את הטלפון לפני תחילת ההקלטה
+async function startPhase() {
+  initAudio();
+  if (S.mode !== 'idle') { cancelPhase(); return; }
+  if (S.rec.A && S.rec.B) { S.rec = { A: null, B: null }; S.res = { A: null, B: null }; S.phase = 'A'; S.demo = false; renderResults(); }
+  if (S.source === 'none') {
+    if (platform === 'Desktop') { $('simToggle').checked = true; $('simProfileWrap').hidden = false; startSim(); toast('אין חיישנים במחשב זה. הסימולטור הופעל.'); }
+    else { const ok = await connectDevice(); if (!ok) return; }
+  }
+  keepAwake(true);
+  S.mode = 'countdown'; renderTestCard();
+  let n = COUNTDOWN; $('timerLbl').textContent = 'היכונו'; $('timerVal').textContent = n; beep(660);
+  cdTimer = setInterval(() => {
+    n--;
+    if (n > 0) { $('timerVal').textContent = n; beep(660); }
+    else { clearInterval(cdTimer); cdTimer = null; beginRecording(); }
+  }, 1000);
+}
+function beginRecording() {
+  beep(1046, 0.3, 0.3);
+  S.curRec = { t: [], x: [], y: [], z: [], source: S.source, profile: S.source === 'sim' ? $('simProfile').value : null };
+  S.recStart = performance.now() / 1000; S.recDur = phaseDur();
+  S.mode = 'recording'; $('timerLbl').textContent = 'מקליט'; renderTestCard();
+  if (S.source === 'sim') simSeed = makeSimSeed();
+}
+let lastSec = null;
+function tickRecording() {
+  const el = performance.now() / 1000 - S.recStart, left = Math.max(0, S.recDur - el), sec = Math.ceil(left);
+  $('timerVal').textContent = sec; $('progBar').style.width = Math.min(100, 100 * el / S.recDur).toFixed(1) + '%';
+  if (sec !== lastSec && sec <= 3 && sec > 0) beep(520, 0.08, 0.18);
+  lastSec = sec;
+  if (left <= 0) finishRecording();
+}
+function finishRecording() {
+  beep(880, 0.15); setTimeout(() => beep(1175, 0.35), 180);
+  const rec = S.curRec; S.curRec = null; S.mode = 'idle'; lastSec = null; keepAwake(false);
+  if (!rec || rec.t.length < 40) { toast('נרשמו מעט מדי דגימות. בדקו את חיבור החיישן ונסו שוב.'); renderTestCard(); return; }
+  rec.dur = rec.t[rec.t.length - 1] - rec.t[0];
+  S.rec[S.phase] = rec; S.res[S.phase] = analyze(rec, S.proto);
+  S.demo = false;
+  if (S.phase === 'A' && !S.rec.B) S.phase = 'B';
+  else if (S.phase === 'B' && !S.rec.A) S.phase = 'A';
+  renderTestCard(); renderResults();
+  toast(S.rec.A && S.rec.B ? 'שני המצבים נרשמו. התוצאות מוכנות.' : 'המצב נרשם. קראו את ההוראות הבאות.');
+}
+function cancelPhase() {
+  if (cdTimer) clearInterval(cdTimer); cdTimer = null;
+  S.mode = 'idle'; S.curRec = null; lastSec = null; keepAwake(false); renderTestCard(); toast('ההקלטה בוטלה.');
+}
+$('startBtn').addEventListener('click', startPhase);
+$('redoA').addEventListener('click', () => { S.phase = 'A'; S.rec.A = null; S.res.A = null; renderTestCard(); renderResults(); startPhase(); });
+$('redoB').addEventListener('click', () => { S.phase = 'B'; S.rec.B = null; S.res.B = null; renderTestCard(); renderResults(); startPhase(); });
+document.querySelectorAll('.proto').forEach(b => b.addEventListener('click', () => {
+  if (S.mode !== 'idle' || b.dataset.proto === S.proto) return;
+  S.proto = b.dataset.proto; S.phase = 'A'; S.rec = { A: null, B: null }; S.res = { A: null, B: null }; S.demo = false;
+  $('simProfile').value = S.proto === 'sway' ? 'impaired' : 'parkinson';
+  renderProtocol(); renderResults();
+}));
+$('variantSel').addEventListener('change', (e) => { S.variant = e.target.value; renderProtocol(); renderResults(); });
+$('durSel').addEventListener('change', (e) => { S.quick = e.target.value === 'quick'; renderTestCard(); });
+
+/* ---------- הקלטות הדגמה ---------- */
+function synthRecording(protoKey, phase, profile, dur) {
+  const fs = 60, ph = makeSimSeed(), r = { t: [], x: [], y: [], z: [], source: 'demo', profile };
+  for (let i = 0; i <= dur * fs; i++) { const t = i / fs, a = simAccel(t, protoKey, phase, profile, ph); r.t.push(t); r.x.push(a[0]); r.y.push(a[1]); r.z.push(a[2]); }
+  r.dur = dur; return r;
+}
+$('demoBtn').addEventListener('click', () => {
+  if (S.mode !== 'idle') return;
+  const prof = S.proto === 'sway' ? 'impaired' : 'parkinson';
+  S.variant = S.proto === 'tremor' ? 'pd_rest' : 'eyes_closed';
+  for (const p of ['A', 'B']) { S.rec[p] = synthRecording(S.proto, p, prof, proto().dur); S.res[p] = analyze(S.rec[p], S.proto); }
+  S.demo = true; renderProtocol(); renderResults();
+  toast('נטענו הקלטות הדגמה (נבדק סינתטי ' + (prof === 'impaired' ? 'עם אטקסיה' : 'עם רעד פרקינסוני') + ').');
+});
+
+/* ---------- ניתוח אותות ---------- */
+function resample(rec) {
+  const t = rec.t, n = t.length, dts = [];
+  for (let i = 1; i < n; i++) dts.push(t[i] - t[i - 1]);
+  dts.sort((a, b) => a - b);
+  const med = dts[Math.floor(dts.length / 2)] || 1 / 60;
+  const fs = Math.max(20, Math.min(100, Math.round(1 / med)));
+  const T = t[n - 1] - t[0], N = Math.floor(T * fs) + 1;
+  const out = { fs, N, T, x: new Float64Array(N), y: new Float64Array(N), z: new Float64Array(N) };
+  let j = 0;
+  for (let i = 0; i < N; i++) {
+    const tt = t[0] + i / fs;
+    while (j < n - 2 && t[j + 1] < tt) j++;
+    const span = t[j + 1] - t[j] || 1, f = Math.max(0, Math.min(1, (tt - t[j]) / span));
+    out.x[i] = rec.x[j] + f * (rec.x[j + 1] - rec.x[j]);
+    out.y[i] = rec.y[j] + f * (rec.y[j + 1] - rec.y[j]);
+    out.z[i] = rec.z[j] + f * (rec.z[j + 1] - rec.z[j]);
+  }
+  return out;
+}
+const mean = (a) => { let s = 0; for (const v of a) s += v; return s / a.length; };
+function movAvg(a, w) {
+  w = Math.max(1, w | 0); const n = a.length, out = new Float64Array(n), cs = new Float64Array(n + 1);
+  for (let i = 0; i < n; i++) cs[i + 1] = cs[i] + a[i];
+  const h = Math.floor(w / 2);
+  for (let i = 0; i < n; i++) { const lo = Math.max(0, i - h), hi = Math.min(n, i + h + 1); out[i] = (cs[hi] - cs[lo]) / (hi - lo); }
+  return out;
+}
+const sub = (a, b) => a.map((v, i) => v - b[i]);
+function principalAxis(ax, ay, az) {
+  const n = ax.length, c = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+  for (let i = 0; i < n; i++) { const v = [ax[i], ay[i], az[i]]; for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) c[r][k] += v[r] * v[k]; }
+  let e = [0.577, 0.577, 0.577];
+  for (let it = 0; it < 40; it++) {
+    const m = [0, 1, 2].map(r => c[r][0] * e[0] + c[r][1] * e[1] + c[r][2] * e[2]);
+    const nn = Math.hypot(...m) || 1; e = m.map(v => v / nn);
+  }
+  const p = new Float64Array(n); for (let i = 0; i < n; i++) p[i] = ax[i] * e[0] + ay[i] * e[1] + az[i] * e[2];
+  return p;
+}
+function spectrum(sig, fs, f0, f1, step) {
+  const n = sig.length, w = new Float64Array(n); let ws = 0;
+  for (let i = 0; i < n; i++) { w[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)); ws += w[i]; }
+  const fr = [], amp = [];
+  f1 = Math.min(f1, fs / 2 - 0.5);
+  for (let f = f0; f <= f1 + 1e-9; f += step) {
+    let re = 0, im = 0; const k = 2 * Math.PI * f / fs;
+    for (let i = 0; i < n; i++) { const v = sig[i] * w[i]; re += v * Math.cos(k * i); im -= v * Math.sin(k * i); }
+    fr.push(+f.toFixed(3)); amp.push(2 * Math.hypot(re, im) / ws);
+  }
+  return { f: fr, a: amp };
+}
+function bandShare(sp, lo, hi, fromF, toF) {
+  let b = 0, tot = 0;
+  sp.f.forEach((f, i) => { const p = sp.a[i] ** 2; if (f >= fromF && f <= toF) tot += p; if (f >= lo && f <= hi) b += p; });
+  return tot ? b / tot : 0;
+}
+function analyze(rec, protoKey) {
+  const u = resample(rec), fs = u.fs, N = u.N;
+  const g = [mean(u.x), mean(u.y), mean(u.z)], gn = Math.hypot(...g), gh = g.map(v => v / gn);
+  let rx = u.x.map(v => v - g[0]), ry = u.y.map(v => v - g[1]), rz = u.z.map(v => v - g[2]);
+  const time = Array.from({ length: N }, (_, i) => i / fs);
+  if (protoKey === 'sway') {
+    // רצועה 0.1–5 Hz: החלקה והסרת סחיפה איטית
+    const lp = (a) => movAvg(a, Math.round(fs * 0.1));
+    const hp = (a) => sub(a, movAvg(a, Math.round(fs * 10)));
+    rx = hp(lp(rx)); ry = hp(lp(ry)); rz = hp(lp(rz));
+    let ss = 0, pk = 0;
+    for (let i = 0; i < N; i++) { const m = rx[i] ** 2 + ry[i] ** 2 + rz[i] ** 2; ss += m; pk = Math.max(pk, Math.sqrt(m)); }
+    const rms = Math.sqrt(ss / N);
+    // רכיבים אופקיים (ניצבים לכבידה), אינטגרציה כפולה עם הסרת סחיפה
+    const hx = new Float64Array(N), hy = new Float64Array(N), hz = new Float64Array(N);
+    for (let i = 0; i < N; i++) { const d = rx[i] * gh[0] + ry[i] * gh[1] + rz[i] * gh[2]; hx[i] = rx[i] - d * gh[0]; hy[i] = ry[i] - d * gh[1]; hz[i] = rz[i] - d * gh[2]; }
+    const integ = (a) => { const o = new Float64Array(N); for (let i = 1; i < N; i++) o[i] = o[i - 1] + (a[i] + a[i - 1]) / 2 / fs; return sub(o, movAvg(o, Math.round(fs * 2))); };
+    const dx = integ(integ(hx)), dy = integ(integ(hy)), dz = integ(integ(hz));
+    let path = 0; for (let i = 1; i < N; i++) path += Math.hypot(dx[i] - dx[i - 1], dy[i] - dy[i - 1], dz[i] - dz[i - 1]);
+    path *= 1000;
+    const p = principalAxis(rx, ry, rz);
+    const sp = spectrum(p, fs, 0.1, 3, 0.05);
+    let fi = 0; sp.a.forEach((a, i) => { if (a > sp.a[fi]) fi = i; });
+    return { proto: 'sway', fs, N, T: u.T, rms, peak: pk, path, vel: path / u.T, domF: sp.f[fi], time, trace: p, spec: sp };
+  }
+  const hp = (a) => sub(a, movAvg(a, Math.round(fs * 0.5)));
+  const lp = (a) => movAvg(a, fs >= 80 ? 3 : 1);
+  rx = lp(hp(rx)); ry = lp(hp(ry)); rz = lp(hp(rz));
+  let ss = 0, pk = 0;
+  for (let i = 0; i < N; i++) { const m = rx[i] ** 2 + ry[i] ** 2 + rz[i] ** 2; ss += m; pk = Math.max(pk, Math.sqrt(m)); }
+  const rms = Math.sqrt(ss / N);
+  const p = principalAxis(rx, ry, rz);
+  const sp = spectrum(p, fs, 1, 15, 0.1);
+  let fi = -1; sp.a.forEach((a, i) => { if (sp.f[i] >= 2 && (fi < 0 || a > sp.a[fi])) fi = i; });
+  const low = bandShare(sp, 3, 6, 1, 15), high = bandShare(sp, 8, 12, 1, 15), domF = sp.f[fi];
+  const severity = rms < 0.06 ? 0 : rms < 0.15 ? 1 : rms < 0.35 ? 2 : rms < 0.7 ? 3 : 4;
+  let cls;
+  if (rms < 0.06) cls = { label: 'אין רעד משמעותי', kind: 'ok' };
+  else if (domF >= 3 && domF < 6.5) cls = { label: 'תדר נמוך 3–6 Hz · דפוס רעד מנוחה / פרקינסוני', kind: 'alert' };
+  else if (domF >= 7.5 && domF <= 12.5) cls = { label: 'תדר גבוה 8–12 Hz · רעד פיזיולוגי / פיזיולוגי מוגבר', kind: severity >= 2 ? 'warn' : 'ok' };
+  else if (domF >= 6.5 && domF < 7.5) cls = { label: 'תדר ביניים 6–8 Hz · טווח רעד עצמוני (Essential)', kind: 'warn' };
+  else cls = { label: 'תדר נמוך מ-3 Hz · תנועה רצונית או צרבלרית', kind: 'warn' };
+  return { proto: 'tremor', fs, N, T: u.T, rms, peak: pk, domF, low, high, severity, cls, time, trace: p, spec: sp };
+}
+
+/* ---------- תוצאות ---------- */
+const fmt = (v, d = 3) => (v == null || !isFinite(v)) ? '—' : v.toFixed(d);
+const pct = (a, b) => (a && isFinite(a) && isFinite(b)) ? (b - a) / a * 100 : null;
+const fmtPct = (p) => p == null ? '—' : (p >= 0 ? '+' : '') + p.toFixed(0) + '%';
+function rows() {
+  const A = S.res.A, B = S.res.B, d = (k) => (A && B ? pct(A[k], B[k]) : null);
+  if (S.proto === 'sway') return [
+    ['נדנוד RMS ‏(m/s²)', A?.rms, B?.rms, 3, d('rms')],
+    ['תאוצת שיא ‏(m/s²)', A?.peak, B?.peak, 3, d('peak')],
+    ['אורך מסלול הנדנוד (מ״מ, הערכה)', A?.path, B?.path, 0, d('path')],
+    ['מהירות נדנוד ממוצעת (מ״מ/ש׳, הערכה)', A?.vel, B?.vel, 1, d('vel')],
+    ['תדר נדנוד דומיננטי ‏(Hz)', A?.domF, B?.domF, 2, null],
+    ['קצב דגימה ‏(Hz)', A?.fs, B?.fs, 0, null]
+  ];
+  return [
+    ['רעד RMS ‏(m/s²)', A?.rms, B?.rms, 3, d('rms')],
+    ['משרעת רעד שיא ‏(m/s²)', A?.peak, B?.peak, 3, d('peak')],
+    ['תדר דומיננטי ‏(Hz)', A?.domF, B?.domF, 1, null],
+    ['הספק ברצועת 3–6 Hz ‏(%)', A ? A.low * 100 : null, B ? B.low * 100 : null, 0, null],
+    ['הספק ברצועת 8–12 Hz ‏(%)', A ? A.high * 100 : null, B ? B.high * 100 : null, 0, null],
+    ['ציון חומרת רעד (0–4)', A?.severity, B?.severity, 0, null],
+    ['קצב דגימה ‏(Hz)', A?.fs, B?.fs, 0, null]
+  ];
+}
+function summaryData() {
+  const A = S.res.A, B = S.res.B;
+  if (!A || !B) return null;
+  const vl = variant().label;
+  if (S.proto === 'sway') {
+    const ratio = B.rms / A.rms, inc = pct(A.rms, B.rms);
+    const kind = ratio < 1.5 ? 'ok' : ratio < 2.5 ? 'warn' : 'alert';
+    const verdict = kind === 'ok' ? 'בטווח הצפוי' : kind === 'warn' ? 'עלייה קלה בחוסר היציבות' : 'חוסר יציבות ניכר';
+    const text = kind === 'ok'
+      ? `הנדנוד עלה במתינות במצב "${vl}". יחס רומברג קרוב ל-1.0 או מעט מעליו צפוי כאשר מנטרלים ראייה או מצמצמים את בסיס התמיכה.`
+      : kind === 'warn'
+        ? `הנדנוד עלה בבירור במצב "${vl}". יש לשקול הסתמכות על ראייה כפיצוי על ירידה בקלט פרופריוספטיבי או וסטיבולרי, עייפות, או פגיעה תפקודית קלה.`
+        : `הנדנוד יותר מהוכפל במצב "${vl}". הדפוס מתאים לסימן רומברג חיובי: אטקסיה תחושתית (פגיעה בעמודות הגביות / בחוש המנח), הפרעה וסטיבולרית, או פגיעה חריפה כגון שכרות. באטקסיה צרבלרית הנדנוד גבוה בדרך כלל בשני המצבים.`;
+    return { kind, verdict, headline: fmtPct(inc), headLabel: 'שינוי בנדנוד RMS', extra: `יחס רומברג (RMS B ÷ RMS A): ${ratio.toFixed(2)}`, text, ratio };
+  }
+  const inc = pct(A.rms, B.rms), kind = B.cls.kind, f = B.domF.toFixed(1);
+  const text = B.cls.kind === 'alert'
+    ? `במצב B נמדדה תנודה דומיננטית של ${f} Hz. רעד של 3–6 Hz המופיע במנוחה ובהסחת דעת אופייני לרעד פרקינסוני (גרעיני הבסיס, אובדן דופמינרגי). יש לשלב עם בדיקת נוקשות, ברדיקינזיה והאם הרעד נחלש בתנועה רצונית.`
+    : B.domF >= 7.5 && B.domF <= 12.5
+      ? `במצב B שולטת תנודה של ${f} Hz, ברצועת הרעד הפיזיולוגי. עלייה במשרעת לאחר קפאין, עייפות, חרדה או תרופות סימפתומימטיות מצביעה על רעד פיזיולוגי מוגבר ולא על סיבה מבנית.`
+      : `התדר הדומיננטי במצב B הוא ${f} Hz. השוו לרצועת 3–6 Hz (מנוחה / פרקינסוני) ולרצועת 8–12 Hz (פיזיולוגי) ולהקשר הקליני.`;
+  return { kind, verdict: B.cls.label, headline: fmtPct(inc), headLabel: 'שינוי ברעד RMS', extra: `תדר דומיננטי: מצב A ‏${A.domF.toFixed(1)} Hz, מצב B ‏${f} Hz · ציון חומרה ${B.severity}/4`, text };
+}
+function renderResults() {
+  $('statTable').querySelector('tbody').innerHTML = rows().map(([n, a, b, d, dp]) => {
+    const dcls = dp == null ? '' : dp > 0 ? 'delta-up' : 'delta-down';
+    return `<tr><td>${n}</td><td class="num">${fmt(a, d)}</td><td class="num">${fmt(b, d)}</td><td class="num ${dcls}">${fmtPct(dp)}</td></tr>`;
+  }).join('');
+  const sm = summaryData(), box = $('summary');
+  if (!sm) {
+    box.className = 'summary';
+    box.innerHTML = `<span class="sub">${S.res.A ? 'מצב A נרשם. הקליטו את מצב B כדי לראות את ההשוואה.' : 'התוצאות יופיעו כאן לאחר רישום מצב A ומצב B.'}</span>`;
+  } else {
+    box.className = 'summary ' + sm.kind;
+    box.innerHTML = `<div class="headline"><span class="big">${sm.headline}</span><span class="sub">${sm.headLabel}</span><span class="pill ${sm.kind}">${sm.verdict}</span></div>
+      <div style="font-size:13.5px;font-weight:600">${sm.extra}</div><p class="sub" style="color:var(--ink)">${sm.text}</p>`;
+  }
+  $('demoFlag').hidden = !S.demo;
+  fixBidiDom();
+  renderCompare();
+}
+function compareOpts(pal, forView) {
+  const A = S.res.A, B = S.res.B, view = forView || S.view, series = [];
+  const ca = pal.a || cssVar('--trace-a'), cb = pal.b || cssVar('--trace-b');
+  if (view === 'time') {
+    let mx = 0.05; [A, B].forEach(r => r && r.trace.forEach(v => mx = Math.max(mx, Math.abs(v))));
+    if (A) series.push({ x: A.time, y: Array.from(A.trace), color: ca, width: 1.3 });
+    if (B) series.push({ x: B.time, y: Array.from(B.trace), color: cb, width: 1.3 });
+    const T = Math.max(A?.T || 0, B?.T || 0) || proto().dur;
+    return { xRange: [0, T], yRange: [-mx * 1.1, mx * 1.1], series, xLabel: 'זמן (שניות)', yLabel: 'm/s²' };
+  }
+  let mx = 1e-4; [A, B].forEach(r => r && r.spec.a.forEach(v => mx = Math.max(mx, v)));
+  if (A) series.push({ x: A.spec.f, y: A.spec.a, color: ca, width: 1.8, area: true });
+  if (B) series.push({ x: B.spec.f, y: B.spec.a, color: cb, width: 1.8, area: true });
+  const tremor = S.proto === 'tremor';
+  return { xRange: tremor ? [1, 15] : [0.1, 3], yRange: [0, mx * 1.15], series, xLabel: 'תדר (Hz)', yLabel: 'משרעת m/s²',
+    bands: tremor ? [{ from: 3, to: 6, label: 'פרקינסוני 3–6', color: 'rgba(239,68,68,0.08)' }, { from: 8, to: 12, label: 'פיזיולוגי 8–12', color: 'rgba(6,182,212,0.08)' }] : null };
+}
+function compareCaption() {
+  return S.view === 'time'
+    ? 'תאוצה לאורך הציר העיקרי לאחר ניכוי כבידה (m/s²). סטיות גדולות יותר = יותר נדנוד או רעד.'
+    : (S.proto === 'tremor' ? 'ספקטרום משרעת. הרצועות המוצללות מסמנות את הטווח הפרקינסוני (3–6 Hz) ואת הטווח הפיזיולוגי (8–12 Hz).' : 'ספקטרום הנדנוד היציבתי. נדנוד תקין בעמידה שקטה נמצא בעיקר מתחת ל-1 Hz.');
+}
+function renderCompare() {
+  const cv = $('cmpCv'), { w, h, dpr } = fitCanvas(cv), ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const has = S.res.A || S.res.B;
+  $('cmpEmpty').hidden = !!has;
+  $('cmpCaption').textContent = bidi(compareCaption());
+  if (!has) { ctx.clearRect(0, 0, w, h); return; }
+  drawChart(ctx, w, h, compareOpts({}), screenPalette());
+}
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  S.view = b.dataset.view; document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderCompare();
+}));
+window.addEventListener('resize', () => renderCompare());
+if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener && mq.addEventListener('change', () => renderCompare()); }
+
+/* ---------- שמירת רשומות (בדפדפן זה בלבד) ---------- */
+const noteIds = ['stName', 'stId', 'stSubject', 'stPos', 'stObs', 'stConc'];
+noteIds.forEach(id => {
+  try { const v = localStorage.getItem('pml.' + id); if (v) $(id).value = v; } catch (e) {}
+  $(id).addEventListener('input', () => { try { localStorage.setItem('pml.' + id, $(id).value); } catch (e) {} });
+});
+
+/* ---------- דוח PDF ----------
+   jsPDF אינו תומך בעברית בגופנים המובנים, לכן כל עמוד A4 מצויר על canvas
+   (הדפדפן מטפל בכיווניות ובגופן העברי) ומוטמע כתמונה בקובץ ה-PDF. */
+async function buildReportPages() {
+  try { await document.fonts.load('600 20px "IBM Plex Sans Hebrew"'); await document.fonts.load('20px "IBM Plex Mono"'); } catch (e) {}
+  const PW = 1240, PH = 1754, k = PW / 210, M = 15 * k, CW = PW - 2 * M, RX = PW - M;
+  const F = '"IBM Plex Sans Hebrew", Arial, sans-serif';
+  const C = { navy: '#0F172A', cyan: '#06B6D4', amber: '#F59E0B', red: '#EF4444', ink: '#1E293B', ink2: '#475569', line: '#E2E8F0', soft: '#F1F5F9' };
+  const pages = []; let cv, ctx, y;
+  const newPage = () => {
+    cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, PW, PH); ctx.direction = 'rtl'; ctx.textBaseline = 'alphabetic';
+    pages.push(cv); y = M + 10;
+  };
+  const footer = () => {
+    ctx.direction = 'rtl'; ctx.font = `20px ${F}`; ctx.fillStyle = C.ink2; ctx.textAlign = 'right';
+    ctx.fillText('סימולציה לימודית להוראה קלינית. אינו מכשיר רפואי ואינו מיועד לאבחון.', RX, PH - 34);
+    ctx.textAlign = 'left'; ctx.fillText('עמוד ' + pages.length, M, PH - 34);
+  };
+  const ensure = (h) => { if (y + h > PH - 80) { footer(); newPage(); } };
+  const wrap = (text, maxW) => {
+    const out = []; String(text).split('\n').forEach(par => {
+      let line = ''; par.split(/\s+/).forEach(w => { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; });
+      out.push(line);
+    }); return out;
+  };
+  const txt = (s, x, yy, font, color, align = 'right') => { ctx.direction = 'rtl'; ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(bidi(s), x, yy); };
+  const sec = (title, need = 0) => { ensure(76 + need); y += 14; txt(title, RX, y + 26, `700 30px ${F}`, C.navy); ctx.fillStyle = C.cyan; ctx.fillRect(RX - 110, y + 38, 110, 5); y += 62; };
+
+  newPage();
+  // כותרת
+  ctx.fillStyle = C.navy; ctx.fillRect(0, 0, PW, 30 * k); ctx.fillStyle = C.cyan; ctx.fillRect(0, 30 * k, PW, 7);
+  txt('PhysioMotion Lab – ניתוח חיישנים קליני של הסטודנט/ית', RX, 14 * k, `700 44px ${F}`, '#fff');
+  const P = proto(), V = variant();
+  txt(`${P.short}: ${P.title}  |  מצב A: ${P.a.label}  |  מצב B: ${V.label}`, RX, 23.5 * k, `500 24px ${F}`, '#A5F3FC');
+  y = 30 * k + 50;
+
+  // פרטי סטודנט
+  const now = new Date(), src = S.demo ? 'הדגמה (סינתטי)' : S.rec.A.source === 'sim' ? 'סימולטור' : `חיישני המכשיר (${platform})`;
+  const info = [['שם הסטודנט/ית', $('stName').value || '—'], ['מספר סטודנט', $('stId').value || '—'], ['תאריך ושעה', now.toLocaleString('he-IL')],
+    ['נבדק / תרחיש', $('stSubject').value || '—'], ['מיקום המכשיר', $('stPos').value || '—'], ['מקור הנתונים', src]];
+  info.forEach(([kk, v], i) => {
+    const cx = RX - (i % 2) * (CW / 2), cy = y + Math.floor(i / 2) * 40;
+    txt(kk + ':', cx, cy, `600 23px ${F}`, C.ink2);
+    ctx.font = `600 23px ${F}`; const kw = ctx.measureText(kk + ': ').width;
+    ctx.font = `23px ${F}`; let vv = String(v); while (ctx.measureText(vv).width > CW / 2 - kw - 30 && vv.length > 3) vv = vv.slice(0, -2);
+    txt(vv, cx - kw - 8, cy, `23px ${F}`, C.navy);
+  });
+  y += 120;
+
+  // כרטיס סיכום
+  const sm = summaryData(), col = sm.kind === 'alert' ? C.red : sm.kind === 'warn' ? C.amber : C.cyan;
+  ctx.font = `23px ${F}`; const body = wrap(sm.text, CW - 60);
+  const ch = 160 + body.length * 34;
+  sec('סיכום אבחנתי', ch);
+  ctx.fillStyle = '#F8FAFC'; ctx.strokeStyle = col; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(M, y, CW, ch, 16) : ctx.rect(M, y, CW, ch); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = col; ctx.fillRect(RX - 10, y + 12, 8, ch - 24);
+  ctx.direction = 'ltr'; ctx.font = `600 58px "IBM Plex Mono", monospace`; ctx.fillStyle = C.navy; ctx.textAlign = 'right'; ctx.fillText(sm.headline, RX - 30, y + 68);
+  const hw = ctx.measureText(sm.headline).width;
+  txt(sm.headLabel, RX - 50 - hw, y + 66, `24px ${F}`, C.ink2);
+  txt(sm.verdict, RX - 30, y + 106, `700 25px ${F}`, col);
+  txt(sm.extra, RX - 30, y + 142, `500 23px ${F}`, C.navy);
+  body.forEach((l, i) => txt(l, RX - 30, y + 184 + i * 34, `23px ${F}`, C.ink));
+  y += ch + 20;
+
+  // גרפים
+  const pal = { fill: true, bg: '#FFFFFF', grid: '#E2E8F0', ink: '#334155', ink3: '#64748B' };
+  const chartH = 400;
+  const drawLegend = () => {
+    ctx.fillStyle = '#0891B2'; ctx.fillRect(RX - 30, y + 2, 30, 6); txt(`מצב A (${P.a.label})`, RX - 42, y + 12, `22px ${F}`, C.ink2);
+    ctx.fillStyle = '#D97706'; ctx.fillRect(RX - CW / 2 - 30, y + 2, 30, 6); txt(`מצב B (${V.label})`, RX - CW / 2 - 42, y + 12, `22px ${F}`, C.ink2);
+    y += 40;
+  };
+  sec('השוואת עקומים – ציר זמן', chartH + 54);
+  drawChart(ctx, CW, chartH, { ...compareOpts({ a: '#0891B2', b: '#D97706' }, 'time'), fs: 20, padL: 80, xTicks: 8 }, pal, M, y); y += chartH + 14; drawLegend();
+  sec('השוואת עקומים – ספקטרום תדרים', chartH + 24);
+  drawChart(ctx, CW, chartH, { ...compareOpts({ a: '#0891B2', b: '#D97706' }, 'freq'), fs: 20, padL: 80, xTicks: 8 }, pal, M, y); y += chartH + 24;
+
+  // טבלה
+  const rws = rows(), rowH = 46, colX = [RX - 14, M + 470, M + 300, M + 130];
+  sec('מדדים קליניים', rowH * (rws.length + 2));
+  ctx.fillStyle = C.navy; ctx.fillRect(M, y, CW, rowH);
+  ['מדד', 'מצב A', 'מצב B', 'שינוי'].forEach((t, i) => txt(t, colX[i], y + 31, `700 22px ${F}`, '#fff', i ? 'center' : 'right'));
+  y += rowH;
+  const numTxt = (s, x, color = C.navy) => { ctx.direction = 'ltr'; ctx.font = `500 22px "IBM Plex Mono", monospace`; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(s, x, y + 31); };
+  rws.forEach(([n, a, b, d, dp], i) => {
+    if (i % 2) { ctx.fillStyle = C.soft; ctx.fillRect(M, y, CW, rowH); }
+    txt(n, colX[0], y + 31, `22px ${F}`, C.navy);
+    numTxt(fmt(a, d), colX[1]); numTxt(fmt(b, d), colX[2]);
+    numTxt(fmtPct(dp), colX[3], dp == null ? C.ink2 : dp > 0 ? '#DC2626' : '#059669');
+    y += rowH;
+  });
+  if (S.proto === 'sway') { txt('יחס רומברג (RMS B ÷ RMS A)', colX[0], y + 31, `700 22px ${F}`, C.navy); numTxt(sm.ratio.toFixed(2), colX[3]); y += rowH; }
+  ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(M, y); ctx.lineTo(RX, y); ctx.stroke();
+  y += 16;
+
+  // רשומות
+  const block = (title, text) => {
+    sec(title, 72);
+    ctx.font = `23px ${F}`;
+    wrap(text || '(לא מולא)', CW).forEach(l => { ensure(36); txt(l, RX, y + 24, `23px ${F}`, C.ink); y += 36; });
+    y += 10;
+  };
+  block('תצפיות קליניות של הסטודנט/ית', $('stObs').value.trim());
+  block('מסקנה אבחנתית', $('stConc').value.trim());
+  ctx.font = `19px ${F}`;
+  const meth = wrap('שיטה: מד תאוצה של הטלפון (DeviceMotionEvent, ‏accelerationIncludingGravity). האותות נדגמו מחדש, נוכתה הכבידה, בוצע סינון תדרים והטלה על הציר העיקרי. ערכי ההעתק מבוססים על אינטגרציה כפולה ומעידים על מגמות בלבד.', CW);
+  ensure(meth.length * 28 + 10); meth.forEach(l => { txt(l, RX, y + 20, `19px ${F}`, C.ink2); y += 28; });
+  footer();
+  return pages;
+}
+async function exportPDF() {
+  if (!S.res.A || !S.res.B) { toast('יש לרשום את שני המצבים (או לטעון הדגמה) לפני הייצוא.'); return; }
+  if (!window.jspdf) { toast('ספריית ה-PDF אינה זמינה (אין חיבור לרשת). נפתחת תצוגת הדפסה.'); window.print(); return; }
+  const btn = $('pdfBtn'); btn.disabled = true; btn.textContent = 'מכין את הדוח…';
+  try {
+    const pages = await buildReportPages();
+    const { jsPDF } = window.jspdf, doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+    pages.forEach((p, i) => { if (i) doc.addPage(); doc.addImage(p.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297); });
+    const safe = ($('stName').value || 'student').replace(/[^\w֐-׿-]+/g, '_');
+    doc.save(`PhysioMotion_${S.proto}_${safe}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast('דוח ה-PDF נשמר.');
+  } catch (e) { console.error(e); toast('יצירת הדוח נכשלה: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '⬇ ייצוא דוח אבחנתי ל-PDF'; }
+}
+$('pdfBtn').addEventListener('click', exportPDF);
+window.__pml = { buildReportPages }; // לבדיקה בלבד
+
+/* ---------- מדריך שימוש: פתוח בביקור הראשון, ואחר כך לפי הבחירה האחרונה ---------- */
+try { $('guide').open = localStorage.getItem('pml.guide') !== 'closed'; } catch (e) { $('guide').open = true; }
+$('guide').addEventListener('toggle', () => { try { localStorage.setItem('pml.guide', $('guide').open ? 'open' : 'closed'); } catch (e) {} });
+
+/* ---------- אתחול ---------- */
+renderProtocol(); renderResults(); fixBidiDom();
+requestAnimationFrame(renderLive);
+if (platform === 'Desktop') note('זוהה מחשב. הפעילו <b>הדמיית נתוני חיישן</b> כדי להריץ את הפרוטוקולים, או פתחו את הדף בטלפון דרך https:// כדי להשתמש במד התאוצה האמיתי.');
+})();
+</script>
+</body>
+</html>
