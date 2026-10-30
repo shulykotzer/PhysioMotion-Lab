@@ -170,6 +170,11 @@ textarea{min-height:96px;resize:vertical}
 .gstep ul{margin:0;padding-inline-start:18px;font-size:13.5px;color:var(--ink-2)}
 .gstep li{margin:3px 0}
 .guide-tip{grid-column:1/-1;margin:0}
+.share{grid-column:1/-1;display:none;align-items:center;gap:16px;background:var(--surface-2);border-radius:12px;padding:12px 14px}
+@media (min-width:760px) and (hover:hover){.share{display:flex}}
+.share svg{width:132px;height:132px;flex:none;border-radius:8px}
+.share b{font-size:15px}
+.share .url{font-family:var(--font-mono);font-size:13px;direction:ltr;unicode-bidi:isolate;color:var(--cyan-ink);word-break:break-all}
 footer{max-width:1180px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--ink-3)}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 @media print{
@@ -220,6 +225,10 @@ footer{max-width:1180px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-i
         <li>אחרי מצב B מופיעים מיד הגרפים, המדדים והסיכום האבחנתי.</li>
         <li>כותבים תצפיות ומסקנה, ומקישים <b>"ייצוא דוח PDF"</b>.</li>
       </ul></div>
+      <div class="share">
+        <svg viewBox="0 0 37 37" role="img" aria-label="קוד QR לפתיחת המעבדה בטלפון"><rect width="37" height="37" fill="#fff"/><path stroke="#0F172A" d="M2 2.5h7m1 0h2m1 0h3m3 0h5m1 0h1m2 0h7m-33 1h1m5 0h1m1 0h2m2 0h2m2 0h1m1 0h1m4 0h2m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m4 0h2m2 0h1m1 0h1m2 0h1m5 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m3 0h1m1 0h3m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h1m3 0h2m5 0h2m2 0h1m1 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m3 0h2m2 0h1m4 0h4m3 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h2m2 0h1m4 0h2m1 0h1m1 0h3m-25 1h1m1 0h2m1 0h3m1 0h3m1 0h2m1 0h4m1 0h1m1 0h2m1 0h1m2 0h1m1 0h2m-31 1h1m2 0h1m2 0h2m1 0h1m2 0h1m1 0h1m2 0h3m1 0h1m2 0h2m1 0h4m-33 1h1m4 0h2m3 0h3m1 0h1m1 0h2m2 0h2m1 0h1m1 0h5m1 0h2m-32 1h1m11 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m-30 1h1m1 0h7m1 0h3m5 0h2m3 0h3m2 0h2m2 0h1m-33 1h1m1 0h1m2 0h1m2 0h1m1 0h2m1 0h1m2 0h3m2 0h1m1 0h2m2 0h1m1 0h1m1 0h1m-28 1h1m1 0h2m2 0h2m2 0h3m1 0h1m2 0h1m2 0h1m1 0h2m1 0h2m-30 1h1m2 0h1m4 0h4m3 0h1m1 0h5m2 0h2m1 0h3m-31 1h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m1 0h1m2 0h5m2 0h2m1 0h3m-31 1h4m3 0h2m2 0h2m1 0h2m1 0h1m3 0h1m1 0h2m1 0h1m1 0h2m2 0h1m-31 1h1m3 0h4m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m3 0h3m1 0h2m-32 1h1m1 0h4m5 0h1m1 0h1m1 0h2m2 0h2m1 0h5m1 0h1m3 0h1m-29 1h1m1 0h1m1 0h1m1 0h3m1 0h2m2 0h3m1 0h1m6 0h4m-33 1h1m1 0h1m5 0h2m5 0h1m1 0h2m2 0h1m1 0h2m1 0h1m5 0h1m-31 1h1m1 0h1m1 0h1m1 0h3m2 0h2m1 0h2m4 0h2m2 0h2m3 0h2m-32 1h2m2 0h1m1 0h2m4 0h1m2 0h1m2 0h1m2 0h3m1 0h2m1 0h1m2 0h1m-33 1h1m4 0h2m4 0h2m1 0h2m1 0h1m2 0h1m1 0h7m2 0h2m-25 1h1m1 0h1m4 0h1m1 0h3m2 0h1m1 0h1m3 0h2m-30 1h7m1 0h2m1 0h2m1 0h1m1 0h1m2 0h2m1 0h3m1 0h1m1 0h1m-29 1h1m5 0h1m1 0h1m2 0h2m1 0h1m5 0h2m1 0h2m3 0h3m-31 1h1m1 0h3m1 0h1m4 0h4m2 0h1m2 0h1m2 0h6m1 0h1m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m9 0h5m4 0h1m1 0h4m-33 1h1m1 0h3m1 0h1m1 0h1m2 0h2m1 0h1m4 0h1m6 0h2m1 0h1m-30 1h1m5 0h1m3 0h1m3 0h6m3 0h3m1 0h2m3 0h1m-33 1h7m1 0h1m1 0h3m1 0h5m2 0h1m1 0h1m2 0h1m1 0h1"/></svg>
+        <div><b>סרקו בטלפון כדי לפתוח את המעבדה</b><p class="sub" style="margin-top:4px">פתחו את המצלמה בטלפון, כוונו אל הקוד והקישו על הקישור שמופיע.</p><a class="url" href="https://shulykotzer.github.io/PhysioMotion-Lab/">https://shulykotzer.github.io/PhysioMotion-Lab/</a></div>
+      </div>
       <p class="note guide-tip">הנתונים נשמרים רק בטלפון ולא נשלחים לשום מקום. רענון הדף מוחק את ההקלטות (ההערות הכתובות נשמרות). אם הנבדק/ת זז/ה או נגע/ה במסך, מקישים "חזרה על A" או "חזרה על B". אין טלפון זמין? הפעילו "הדמיית נתוני חיישן" או "טעינת הקלטות הדגמה".</p>
     </div>
   </details>
