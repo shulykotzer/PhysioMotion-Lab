@@ -218,6 +218,16 @@ td.val .chg{font-size:12px;font-weight:600}
 .autofill div{font-size:13.5px;color:var(--ink-2)}
 .autofill b{display:block;color:var(--ink);font-size:14.5px}
 .auto-tag{font-size:12px;font-weight:600;color:var(--ink-3)}
+/* תפקידים וסבבים */
+.roles{display:grid;gap:10px;background:var(--surface-2);border-radius:14px;padding:12px 14px}
+.rounds{display:flex;gap:8px;flex-wrap:wrap}
+.round{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.round[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.round .ok{color:var(--green)}
+.namegrid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+@media (max-width:480px){.namegrid{grid-template-columns:1fr}}
+.paircmp{display:grid;gap:8px;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.paircmp table{min-width:0}
 footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--ink-3);display:grid;gap:12px}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 16px;border-radius:12px;font-size:14.5px;z-index:40;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 @media print{header.top,footer,.no-print{display:none!important} body{background:#fff} .card{break-inside:avoid}}
@@ -307,6 +317,16 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
   <section class="card step" id="step3" aria-labelledby="s3H">
     <div class="step-head"><span class="step-num">3</span><div><h2 id="s3H">בוחרים תנוחות ומודדים</h2><p id="s3Sub"></p></div></div>
 
+    <div class="roles" id="roles">
+      <div class="row"><p class="subhead" style="flex:1;min-width:180px">מי בודק/ת ומי נבדק/ת?</p><div class="rounds" id="rounds" role="group" aria-label="סבבים"></div></div>
+      <p class="sub">עובדים בזוג: בסבב 1 אחד/ת בודק/ת והשני/ה נבדק/ת, ובסבב 2 מחליפים תפקידים. כל בודק/ת כותב/ת ומגיש/ה דוח משלו/ה.</p>
+      <div class="namegrid">
+        <label class="fld">בודק/ת (מפעיל/ה וכותב/ת את הדוח)<input type="text" id="nmExaminer" autocomplete="off" placeholder="לדוגמה: נועה"></label>
+        <label class="fld">נבדק/ת (מחזיק/ה את הטלפון)<input type="text" id="nmSubject" autocomplete="off" placeholder="לדוגמה: יעל"></label>
+      </div>
+      <button class="btn" id="swapBtn" type="button">⇄ החלפת תפקידים</button>
+    </div>
+
     <div class="howto" id="howto"></div>
 
     <div style="display:grid;gap:8px">
@@ -367,13 +387,13 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
       <p class="chart-help" id="chartHelp"></p>
       <b style="font-size:16px">המספרים</b>
       <div class="tablewrap"><table id="statTable"><thead></thead><tbody></tbody></table></div>
+      <div class="paircmp" id="pairCmp" hidden></div>
     </div>
   </section>
 
   <!-- שלב 5: דוח -->
   <section class="card step" id="step5" aria-labelledby="s5H">
-    <div class="step-head"><span class="step-num">5</span><div><h2 id="s5H">כותבים ושולחים דוח</h2><p>רוב הפרטים כבר מולאו. חסרים רק השם והתצפיות שלכם.</p></div></div>
-    <label class="fld">שם הסטודנט/ית (או שני השמות בזוג)<input type="text" id="stName" autocomplete="name" placeholder="לדוגמה: נועה כהן ויעל לוי"></label>
+    <div class="step-head"><span class="step-num">5</span><div><h2 id="s5H">כותבים ושולחים דוח</h2><p id="s5Sub">רוב הפרטים כבר מולאו. חסרות רק התצפיות שלך.</p></div></div>
     <div><span class="auto-tag">ממולא אוטומטית</span>
       <div class="autofill" id="autofill"></div>
     </div>
@@ -403,6 +423,7 @@ function fixBidiDom(root = document.body) {
 }
 const rand = (n, chars = 'abcdefghijklmnopqrstuvwxyz0123456789') => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => chars[b % chars.length]).join('');
 const store = { get: (k) => { try { return localStorage.getItem('pml.' + k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem('pml.' + k, v); } catch (e) {} } };
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const TRACE_VARS = ['--trace-1', '--trace-2', '--trace-3'];
 const PDF_COLORS = ['#64748B', '#D97706', '#E11D48'];
 
@@ -435,8 +456,15 @@ const S = {
   rec: {}, res: {}, demo: false,
   source: 'none', live: [], lastSampleAt: 0, nSamples: 0, rateTimes: [],
   gSlow: null, rFast: [0, 0, 0], view: 'time', curRec: null, recStart: 0, recDur: 0, cdLeft: 0,
-  remote: null // מצב ההקלטה בטלפון המחובר (במחשב בלבד)
+  remote: null, // מצב ההקלטה בטלפון המחובר (במחשב בלבד)
+  // עבודה בזוג: בסבב 1 א׳ בודק/ת את ב׳, בסבב 2 מתחלפים. הסבב הפעיל נמצא בשדות הרגילים של S, והסבב השני שמור ב-rounds
+  round: 1, names: { a: store.get('nameA') || '', b: store.get('nameB') || '' }, rounds: {}
 };
+const examinerKey = () => S.round === 1 ? 'a' : 'b';
+const subjectKey = () => S.round === 1 ? 'b' : 'a';
+const nameOr = (k) => S.names[k].trim() || (k === 'a' ? 'סטודנט/ית א׳' : 'סטודנט/ית ב׳');
+const examiner = () => nameOr(examinerKey());
+const subject = () => nameOr(subjectKey());
 const proto = () => PROTOCOLS[S.proto];
 const positions = () => proto().positions;
 const posById = (id) => positions().find(p => p.id === id);
@@ -759,7 +787,7 @@ function renderProtocol() {
   $('s3Sub').textContent = `${P.title}: לכל תנוחה מדידה של ${phaseDur()} שניות. משווים בין התנוחות.`;
   $('scenarioSel').value = S.scenario; $('durSel').value = S.quick ? 'quick' : 'std';
   $('resTest').textContent = P.title;
-  renderPositions(); renderTestCard(); renderAutofill();
+  renderPositions(); renderTestCard(); renderAutofill(); renderRoles();
 }
 function renderPositions() {
   const sel = S.sel[S.proto], lock = busy();
@@ -797,7 +825,7 @@ function renderTestCard() {
   const p = posById(v.mode !== 'idle' ? v.cur : nextPos()?.id) || selected()[0];
   const n = measNo(p.id);
   $('instrTitle').textContent = fin ? '✓ כל המדידות הושלמו' : `מדידה ${n} · ${p.label}`;
-  $('instrSub').textContent = fin ? 'גללו למטה לתוצאות (שלב 4). אם משהו השתבש באחת המדידות, אפשר להקליט אותה מחדש.' : p.sub;
+  $('instrSub').textContent = fin ? `גללו למטה לתוצאות (שלב 4). אחר כך אפשר ללחוץ "החלפת תפקידים" כדי ש${subject()} י/תבדוק את ${examiner()}.` : p.sub;
   $('instrSteps').innerHTML = fin ? '' : p.steps.map(s => `<li>${s}</li>`).join('');
   renderMeasList();
   const btn = $('startBtn');
@@ -895,6 +923,61 @@ document.querySelectorAll('.test').forEach(b => b.addEventListener('click', () =
 }));
 $('scenarioSel').addEventListener('change', (e) => { S.scenario = e.target.value; link.cfg(); renderAutofill(); updateConclusion(); });
 $('durSel').addEventListener('change', (e) => { S.quick = e.target.value === 'quick'; link.cfg(); renderProtocol(); });
+
+/* ---------- תפקידים וסבבים ---------- */
+const freshRound = () => ({ proto: S.proto, sel: JSON.parse(JSON.stringify(S.sel)), scenario: S.scenario, res: {}, rec: {}, demo: false, obs: '', conc: '', lastAuto: '' });
+const snapshot = () => ({ proto: S.proto, sel: JSON.parse(JSON.stringify(S.sel)), scenario: S.scenario, res: S.res, rec: S.rec, demo: S.demo, obs: $('stObs').value, conc: $('stConc').value, lastAuto });
+function roundDone(n) {
+  if (n === S.round) return allDone();
+  const r = S.rounds[n]; if (!r || !PROTOCOLS[r.proto]) return false;
+  const ids = r.sel[r.proto] || []; return ids.length >= 2 && ids.every(id => r.res[id]);
+}
+function renderRoles() {
+  const a = nameOr('a'), b = nameOr('b');
+  $('rounds').innerHTML = [1, 2].map(n => `<button class="round" type="button" data-round="${n}" aria-pressed="${n === S.round}">סבב ${n}: ${esc(n === 1 ? a : b)} בודק/ת את ${esc(n === 1 ? b : a)}${roundDone(n) ? ' <span class="ok">✓</span>' : ''}</button>`).join('');
+  $('rounds').querySelectorAll('[data-round]').forEach(btn => btn.addEventListener('click', () => switchRound(+btn.dataset.round)));
+  if (document.activeElement !== $('nmExaminer')) $('nmExaminer').value = S.names[examinerKey()];
+  if (document.activeElement !== $('nmSubject')) $('nmSubject').value = S.names[subjectKey()];
+  const other = S.round === 1 ? 2 : 1;
+  $('swapBtn').textContent = `⇄ החלפת תפקידים: עכשיו ${subject()} בודק/ת את ${examiner()} (סבב ${other})`;
+  $('swapBtn').disabled = busy();
+  $('s5Sub').textContent = `הדוח של ${examiner()}, שבדק/ה את ${subject()}. רוב הפרטים כבר מולאו; חסרות רק התצפיות.`;
+  fixBidiDom($('roles'));
+}
+function switchRound(n, fromRemote = false) {
+  if (n === S.round || (busy() && !fromRemote)) return;
+  S.rounds[S.round] = snapshot();
+  const r = S.rounds[n] || freshRound(); delete S.rounds[n];
+  S.proto = r.proto; S.sel = r.sel; S.scenario = r.scenario; S.res = r.res; S.rec = r.rec; S.demo = r.demo;
+  $('stObs').value = r.obs || ''; $('stConc').value = r.conc || ''; lastAuto = r.lastAuto || '';
+  S.round = n; store.set('round', n);
+  renderAll();
+  if (!fromRemote) { link.cfg(); link.res(); link.notes(); toast(`סבב ${n}: ${examiner()} בודק/ת את ${subject()}.`); }
+}
+$('swapBtn').addEventListener('click', () => { switchRound(S.round === 1 ? 2 : 1); $('step3').scrollIntoView({ behavior: 'smooth' }); });
+[['nmExaminer', examinerKey], ['nmSubject', subjectKey]].forEach(([id, key]) => $(id).addEventListener('input', () => {
+  const k = key(); S.names[k] = $(id).value.slice(0, 40); store.set(k === 'a' ? 'nameA' : 'nameB', S.names[k]);
+  renderRoles(); renderAutofill(); updateConclusion();
+  clearTimeout(renderRoles._t); renderRoles._t = setTimeout(() => link.cfg(), 500);
+}));
+// השוואה בין שני הנבדקים: אותה בדיקה, תנוחות משותפות, עוצמת הנדנוד/הרעד של כל אחד
+function renderPairCompare() {
+  const box = $('pairCmp'), other = S.round === 1 ? 2 : 1, o = S.rounds[other];
+  if (!o || o.proto !== S.proto || !allDone() || !roundDone(other)) { box.hidden = true; return; }
+  const mine = S.round === 1 ? { 1: S.res, 2: o.res } : { 1: o.res, 2: S.res };
+  const ids = selected().map(p => p.id).filter(id => mine[1][id] && mine[2][id]);
+  if (!ids.length) { box.hidden = true; return; }
+  const subj1 = nameOr('b'), subj2 = nameOr('a'), tremor = S.proto === 'tremor';
+  const rowsHTML = ids.map(id => {
+    const p = posById(id), r1 = mine[1][id], r2 = mine[2][id];
+    return `<tr><td><b>${p.label}</b></td><td class="val">${fmt(r1.rms, 3)}${tremor ? `<br><span class="chg">${fmt(r1.domF, 1)} Hz</span>` : ''}</td><td class="val">${fmt(r2.rms, 3)}${tremor ? `<br><span class="chg">${fmt(r2.domF, 1)} Hz</span>` : ''}</td></tr>`;
+  }).join('');
+  box.hidden = false;
+  box.innerHTML = `<b style="font-size:16px">השוואה בין שני הנבדקים</b>
+    <p class="sub">${tremor ? 'עוצמת הרעד (RMS, m/s²) ומהירות הרעד' : 'עוצמת הנדנוד (RMS, m/s²)'} בכל תנוחה. גם אצל אנשים בריאים הערכים שונים מאדם לאדם, ולכן כל נבדק/ת מושווה קודם כול לבסיס של עצמו/ה.</p>
+    <div class="tablewrap"><table><thead><tr><th>תנוחה</th><th>${esc(subj1)} (נבדק/ת בסבב 1)</th><th>${esc(subj2)} (נבדק/ת בסבב 2)</th></tr></thead><tbody>${rowsHTML}</tbody></table></div>`;
+  fixBidiDom(box);
+}
 
 /* ---------- דוגמה מוכנה ---------- */
 function synthRecording(protoKey, idx, profile, dur) {
@@ -1116,7 +1199,7 @@ function renderResults() {
   $('cmpLegend').innerHTML = sel.map((p, i) => `<span><i style="background:var(${TRACE_VARS[i]})"></i>${i + 1} · ${p.label}</span>`).join('');
   $('demoFlag').hidden = !S.demo;
   markStep(4, !!sm);
-  renderCompare(); updateConclusion(); renderAutofill(); renderPositions(); renderMeasList();
+  renderCompare(); updateConclusion(); renderAutofill(); renderPositions(); renderMeasList(); renderPairCompare(); renderRoles();
   fixBidiDom($('step4'));
 }
 // נתוני הגרף בצורה אחידה: מקומית ובתוצאות שהגיעו מהמכשיר המחובר
@@ -1158,25 +1241,27 @@ function sourceText() {
 }
 function renderAutofill() {
   const P = proto();
-  const items = [['בדיקה', P.title], ['תנוחות', selected().map((p, i) => `${i + 1}. ${p.label}`).join(' · ')], ['מצב הנבדק/ת', S.scenario], ['אחיזת הטלפון', P.placement], ['תאריך', new Date().toLocaleDateString('he-IL')], ['מקור הנתונים', sourceText()]];
+  const items = [['בודק/ת', examiner()], ['נבדק/ת', subject()], ['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title], ['תנוחות', selected().map((p, i) => `${i + 1}. ${p.label}`).join(' · ')], ['מצב הנבדק/ת', S.scenario], ['אחיזת הטלפון', P.placement], ['תאריך', new Date().toLocaleDateString('he-IL')], ['מקור הנתונים', sourceText()]];
   $('autofill').innerHTML = items.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
   fixBidiDom($('autofill'));
 }
 function autoConclusion() {
   const sm = summaryData(); if (!sm) return '';
-  return `${proto().title} (${S.scenario}): ${sm.verdict}. ${sm.items.map(i => i.line).join('. ')}. ${sm.text}`;
+  return `${proto().title} של ${subject()} (${S.scenario}): ${sm.verdict}. ${sm.items.map(i => i.line).join('. ')}. ${sm.text}`;
 }
 // הטיוטה האוטומטית נשמרת בנפרד, כדי שגם אחרי רענון נדע שהיא לא נכתבה ע"י הסטודנט/ית ומותר להחליף אותה
 let lastAuto = store.get('concAuto') || '';
 function updateConclusion() {
   const t = $('stConc'), auto = autoConclusion();
   if (!auto) return;
-  if (!t.value.trim() || t.value === lastAuto) { t.value = auto; store.set('stConc', auto); }
+  if (!t.value.trim() || t.value === lastAuto) { t.value = auto; store.set('stConc' + S.round, auto); }
   lastAuto = auto; store.set('concAuto', auto);
 }
-['stName', 'stObs', 'stConc'].forEach(id => {
-  const v = store.get(id); if (v) $(id).value = v;
-  $(id).addEventListener('input', () => { store.set(id, $(id).value); link.notes(); });
+// התצפיות והמסקנה נשמרות לכל סבב בנפרד
+S.round = +store.get('round') === 2 ? 2 : 1;
+['stObs', 'stConc'].forEach(id => {
+  const v = store.get(id + S.round); if (v) $(id).value = v;
+  $(id).addEventListener('input', () => { store.set(id + S.round, $(id).value); link.notes(); });
 });
 
 /* ---------- דוח PDF ----------
@@ -1217,7 +1302,7 @@ async function buildReportPages() {
   y = 30 * k + 50;
 
   const now = new Date();
-  const info = [['שם', $('stName').value || '—'], ['תאריך ושעה', now.toLocaleString('he-IL')], ['בדיקה', P.title],
+  const info = [['בודק/ת', examiner()], ['נבדק/ת', subject()], ['תאריך ושעה', now.toLocaleString('he-IL')], ['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title],
     ['מצב הנבדק/ת', S.scenario], ['אחיזת הטלפון', P.placement], ['מקור הנתונים', sourceText()]];
   info.forEach(([kk, v], i) => {
     const cx = RX - (i % 2) * (CW / 2), cy = y + Math.floor(i / 2) * 40;
@@ -1226,7 +1311,7 @@ async function buildReportPages() {
     ctx.font = `23px ${F}`; let vv = String(v); while (ctx.measureText(vv).width > CW / 2 - kw - 30 && vv.length > 3) vv = vv.slice(0, -2);
     txt(vv, cx - kw - 8, cy, `23px ${F}`, C.navy);
   });
-  y += 120;
+  y += 160;
 
   const sm = summaryData(), col = sm.kind === 'alert' ? C.red : sm.kind === 'warn' ? C.amber : C.green;
   ctx.font = `23px ${F}`; const body = wrap(sm.text, CW - 60);
@@ -1300,7 +1385,7 @@ async function exportPDF() {
     const pages = await buildReportPages();
     const { jsPDF } = window.jspdf, doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
     pages.forEach((p, i) => { if (i) doc.addPage(); doc.addImage(p.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297); });
-    const safe = ($('stName').value || 'student').replace(/[^\w֐-׿-]+/g, '_');
+    const safe = (examiner() || 'student').replace(/[^\w֐-׿-]+/g, '_');
     doc.save(`PhysioMotion_${S.proto}_${safe}_${new Date().toISOString().slice(0, 10)}.pdf`);
     toast('הדוח נשמר בהורדות.');
     markStep(5, true);
@@ -1323,7 +1408,7 @@ const link = (() => {
   const SID = rand(10); // מזהה לטעינת הדף הזו, כדי להתעלם מההודעות של עצמנו
   const qs = new URLSearchParams(location.search);
   let code = '', broker = 0, mq = null, peerSeen = 0, peerSensor = 'none';
-  const localTs = { cfg: 0, res: 0, notes: 0 };
+  const localTs = {}; // זמן השינוי המקומי האחרון לכל ערוץ
   const loaded = {};
   const loadScript = (src) => loaded[src] || (loaded[src] = new Promise((res, rej) => {
     const el = document.createElement('script'); el.src = src; el.onload = res;
@@ -1360,23 +1445,23 @@ const link = (() => {
   function hello() { if (isPhone) live(); else pub('pc', {}, false); }
 
   // ----- שליחה -----
-  function cfg() { localTs.cfg = Date.now(); pub('cfg', { proto: S.proto, sel: S.sel, quick: S.quick, scenario: S.scenario }, true); }
+  function cfg() { localTs.cfg = Date.now(); pub('cfg', { round: S.round, names: S.names, proto: S.proto, sel: S.sel, quick: S.quick, scenario: S.scenario }, true); }
   function notes() {
     clearTimeout(notes._t);
-    notes._t = setTimeout(() => { localTs.notes = Date.now(); pub('notes', { name: $('stName').value, obs: $('stObs').value, conc: $('stConc').value }, true); }, 500);
+    notes._t = setTimeout(() => { const ch = 'notes' + S.round; localTs[ch] = Date.now(); pub(ch, { obs: $('stObs').value, conc: $('stConc').value }, true); }, 500);
   }
   const r4 = (v) => Math.round(v * 1e4) / 1e4;
   const pick = (a, n) => { a = Array.from(a); if (a.length <= n) return a.map(r4); return Array.from({ length: n }, (_, i) => r4(a[Math.floor(i * a.length / n)])); };
   function pool(f, a, n) { const k = Math.max(1, Math.ceil(a.length / n)), F = [], A = []; for (let i = 0; i < a.length; i += k) { F.push(r4(f[i])); A.push(r4(Math.max(...a.slice(i, i + k)))); } return [F, A]; }
   function res() {
-    localTs.res = Date.now();
+    const ch = 'res' + S.round; localTs[ch] = Date.now();
     const out = {};
     for (const [id, r] of Object.entries(S.res)) {
       const [sf, sa] = pool(r.spec.f, r.spec.a, 80);
       out[id] = { rms: r4(r.rms), peak: r4(r.peak), path: r.path != null ? r4(r.path) : null, vel: r.vel != null ? r4(r.vel) : null, domF: r4(r.domF),
         low: r.low != null ? r4(r.low) : null, high: r.high != null ? r4(r.high) : null, T: r4(r.T), fs: r.fs, tr: pick(r.trace, 240), sf, sa, src: S.rec[id]?.source || 'device' };
     }
-    pub('res', { proto: S.proto, demo: S.demo, res: out }, true);
+    pub(ch, { proto: S.proto, demo: S.demo, res: out }, true);
   }
   function live() {
     if (!isPhone || !code) return;
@@ -1392,17 +1477,20 @@ const link = (() => {
     const ch = t.split('/').pop(); let m;
     try { m = JSON.parse(buf.toString()); } catch (e) { return; }
     if (!m || typeof m !== 'object' || m.sid === SID) return;
-    if (packet && packet.retain && localTs[ch] != null && (+m.ts || 0) <= localTs[ch]) return; // הודעה שמורה ישנה מהשינוי האחרון שלנו
+    if (packet && packet.retain && (+m.ts || 0) <= (localTs[ch] || 0)) return; // הודעה שמורה ישנה מהשינוי האחרון שלנו
     if (ch === 'live' && !isPhone) { peerSeen = Date.now(); peerSensor = m.sensor; S.remote = { mode: m.mode, cur: m.cur, left: num(m.left), dur: num(m.dur) || 1 }; status(); renderTestCard(); renderPositions(); return; }
     if (ch === 'pc' && isPhone) { peerSeen = Date.now(); status(); return; }
     if (ch === 'cmd' && isPhone) { peerSeen = Date.now(); onCmd(m); return; }
-    if (busy() && ch !== 'notes') return; // לא משנים הגדרות באמצע הקלטה
+    const n = +ch.slice(-1);
+    if (/^notes[12]$/.test(ch)) return applyNotes(m, n);
+    if (busy()) return; // לא משנים הגדרות באמצע הקלטה
     if (ch === 'cfg') applyCfg(m);
-    else if (ch === 'res') applyRes(m);
-    else if (ch === 'notes') applyNotes(m);
+    else if (/^res[12]$/.test(ch)) applyRes(m, n);
   }
   function applyCfg(m) {
     if (!PROTOCOLS[m.proto]) return;
+    if (m.names && typeof m.names === 'object') ['a', 'b'].forEach(k => { if (typeof m.names[k] === 'string') { S.names[k] = m.names[k].slice(0, 40); store.set(k === 'a' ? 'nameA' : 'nameB', S.names[k]); } });
+    if ((m.round === 1 || m.round === 2) && m.round !== S.round) switchRound(m.round, true);
     S.proto = m.proto;
     for (const k of Object.keys(PROTOCOLS)) {
       const ids = PROTOCOLS[k].positions.map(p => p.id), got = Array.isArray(m.sel?.[k]) ? ids.filter(id => m.sel[k].includes(id)) : null;
@@ -1412,24 +1500,27 @@ const link = (() => {
     if ([...$('scenarioSel').options].some(o => o.value === m.scenario)) S.scenario = m.scenario;
     renderAll();
   }
-  function applyRes(m) {
+  function applyRes(m, n) {
     if (!PROTOCOLS[m.proto]) return;
-    S.proto = m.proto; S.res = {}; S.rec = {}; S.demo = !!m.demo;
-    const ids = PROTOCOLS[m.proto].positions.map(p => p.id);
+    const res = {}, rec = {}, ids = PROTOCOLS[m.proto].positions.map(p => p.id);
     for (const [id, c] of Object.entries(m.res || {})) {
       if (!ids.includes(id) || !c) continue;
       const tr = nums(c.tr), T = num(c.T) || 1, rms = num(c.rms) || 0, domF = num(c.domF) || 0;
-      S.res[id] = { rms, peak: num(c.peak), path: num(c.path), vel: num(c.vel), domF, low: num(c.low), high: num(c.high), T, fs: num(c.fs),
+      res[id] = { rms, peak: num(c.peak), path: num(c.path), vel: num(c.vel), domF, low: num(c.low), high: num(c.high), T, fs: num(c.fs),
         trace: tr, time: tr.map((_, i) => i * T / Math.max(1, tr.length - 1)), spec: { f: nums(c.sf), a: nums(c.sa) }, ...classify(rms, domF) };
-      S.rec[id] = { source: c.src === 'sim' || c.src === 'demo' ? c.src : 'device' };
+      rec[id] = { source: c.src === 'sim' || c.src === 'demo' ? c.src : 'device' };
     }
+    if (n !== S.round) { S.rounds[n] = { ...(S.rounds[n] || freshRound()), proto: m.proto, res, rec, demo: !!m.demo }; renderRoles(); renderPairCompare(); return; }
+    S.proto = m.proto; S.res = res; S.rec = rec; S.demo = !!m.demo;
     renderAll();
     if (allDone() && Object.keys(S.res).length) toast('התוצאות עודכנו מהמכשיר המחובר.');
   }
-  function applyNotes(m) {
-    [['stName', m.name], ['stObs', m.obs], ['stConc', m.conc]].forEach(([id, v]) => {
-      if (typeof v !== 'string' || document.activeElement === $(id)) return;
-      $(id).value = v.slice(0, 5000); store.set(id, $(id).value);
+  function applyNotes(m, n) {
+    [['stObs', 'obs'], ['stConc', 'conc']].forEach(([id, k]) => {
+      const v = m[k]; if (typeof v !== 'string') return;
+      store.set(id + n, v.slice(0, 5000));
+      if (n !== S.round) { S.rounds[n] = { ...(S.rounds[n] || freshRound()), [k]: v.slice(0, 5000) }; return; }
+      if (document.activeElement !== $(id)) $(id).value = v.slice(0, 5000);
     });
   }
   function onCmd(m) {
