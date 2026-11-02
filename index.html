@@ -215,9 +215,15 @@ td.val .chg{font-size:12px;font-weight:600}
 .demo-flag{font-size:12px;font-weight:700;color:var(--warn-ink);background:color-mix(in srgb,var(--amber) 22%,transparent);padding:2px 8px;border-radius:6px}
 
 /* דוח */
-.autofill{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;background:var(--surface-2);border-radius:12px;padding:12px}
-.autofill div{font-size:13.5px;color:var(--ink-2)}
-.autofill b{display:block;color:var(--ink);font-size:14.5px}
+.autobox{background:var(--surface-2);border-radius:14px;padding:14px;display:grid;gap:10px}
+.autohead{margin:0;font-size:17px;font-weight:700;color:var(--ok-ink)}
+.autohead span{display:block;font-size:14.5px;font-weight:500;color:var(--ink-2)}
+.autofill{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.autofill .wide{grid-column:1/-1}
+.autofill div{font-size:14px;color:var(--ink-2);background:var(--surface);border-radius:10px;padding:8px 10px}
+.autofill b{display:block;color:var(--ink);font-size:16px}
+.fldtitle{font-size:17px;font-weight:700;color:var(--ink)}
+.fldhelp{font-size:14.5px;font-weight:500;color:var(--ink-2)}
 .auto-tag{font-size:12px;font-weight:600;color:var(--ink-3)}
 /* תפקידים וסבבים */
 .roles{display:grid;gap:10px;background:var(--surface-2);border-radius:14px;padding:12px 14px}
@@ -396,11 +402,12 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
   <!-- שלב 5: דוח -->
   <section class="card step" id="step5" aria-labelledby="s5H">
     <div class="step-head"><span class="step-num">5</span><div><h2 id="s5H">כותבים ושולחים דוח</h2><p id="s5Sub">רוב הפרטים כבר מולאו. חסרות רק התצפיות שלך.</p></div></div>
-    <div><span class="auto-tag">ממולא אוטומטית</span>
+    <div class="autobox">
+      <p class="autohead">✓ הפרטים האלה מולאו אוטומטית<span>אין צורך למלא אותם. הם יופיעו בדוח כפי שהם.</span></p>
       <div class="autofill" id="autofill"></div>
     </div>
-    <label class="fld">תצפיות קליניות: מה ראיתם בעיניים?<textarea id="stObs" placeholder="נדנוד נראה לעין, צעדי תיקון, שימוש בידיים, אופי הרעד (במנוחה / בהושטת יד), תחושת הנבדק/ת…"></textarea></label>
-    <label class="fld"><span>מסקנה אבחנתית <span class="auto-tag">· טיוטה אוטומטית מהתוצאות, אפשר לערוך</span></span><textarea id="stConc" placeholder="תופיע כאן אוטומטית אחרי שכל התנוחות נמדדו."></textarea></label>
+    <label class="fld"><span class="fldtitle">תצפיות קליניות</span><span class="fldhelp">כתבו מה ראיתם בעיניים במהלך הבדיקה. את החלק הזה ממלאים בעצמכם.</span><textarea id="stObs" placeholder="נדנוד נראה לעין, צעדי תיקון, שימוש בידיים, אופי הרעד (במנוחה / בהושטת יד), תחושת הנבדק/ת…"></textarea></label>
+    <label class="fld"><span class="fldtitle">מסקנה אבחנתית</span><span class="fldhelp">המעבדה כתבה כאן טיוטה לפי התוצאות. קראו אותה, תקנו והוסיפו מה שצריך.</span><textarea id="stConc" placeholder="תופיע כאן אוטומטית אחרי שכל התנוחות נמדדו."></textarea></label>
     <button class="bigbtn" id="pdfBtn" type="button">⬇ הורדת הדוח כ-PDF</button>
   </section>
 </main>
@@ -464,7 +471,7 @@ const S = {
 };
 const examinerKey = () => S.round === 1 ? 'a' : 'b';
 const subjectKey = () => S.round === 1 ? 'b' : 'a';
-const nameOr = (k) => S.names[k].trim() || (k === 'a' ? 'סטודנט/ית א׳' : 'סטודנט/ית ב׳');
+const nameOr = (k) => S.names[k].trim() || (k === 'a' ? 'תלמיד/ה א׳' : 'תלמיד/ה ב׳');
 const examiner = () => nameOr(examinerKey());
 const subject = () => nameOr(subjectKey());
 const proto = () => PROTOCOLS[S.proto];
@@ -1244,15 +1251,17 @@ function sourceText() {
 }
 function renderAutofill() {
   const P = proto();
-  const items = [['בודק/ת', examiner()], ['נבדק/ת', subject()], ['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title], ['תנוחות', selected().map((p, i) => `${i + 1}. ${p.label}`).join(' · ')], ['מצב הנבדק/ת', S.scenario], ['אחיזת הטלפון', P.placement], ['תאריך', new Date().toLocaleDateString('he-IL')], ['מקור הנתונים', sourceText()]];
-  $('autofill').innerHTML = items.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
+  // קצרים בזוגות, ארוכים בשורה מלאה בסוף
+  const items = [['בודק/ת', examiner()], ['נבדק/ת', subject()], ['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title], ['מצב הנבדק/ת', S.scenario], ['תאריך', new Date().toLocaleDateString('he-IL')],
+    ['תנוחות', selected().map((p, i) => `${i + 1}. ${p.label}`).join(' · ')], ['אחיזת הטלפון', P.placement], ['מקור הנתונים', sourceText()]];
+  $('autofill').innerHTML = items.map(([k, v]) => `<div${['תנוחות', 'אחיזת הטלפון', 'מקור הנתונים'].includes(k) ? ' class="wide"' : ''}>${k}<b>${v}</b></div>`).join('');
   fixBidiDom($('autofill'));
 }
 function autoConclusion() {
   const sm = summaryData(); if (!sm) return '';
   return `${proto().title} של ${subject()} (${S.scenario}): ${sm.verdict}. ${sm.items.map(i => i.line).join('. ')}. ${sm.text}`;
 }
-// הטיוטה האוטומטית נשמרת בנפרד, כדי שגם אחרי רענון נדע שהיא לא נכתבה ע"י הסטודנט/ית ומותר להחליף אותה
+// הטיוטה האוטומטית נשמרת בנפרד, כדי שגם אחרי רענון נדע שהיא לא נכתבה ע"י התלמיד/ה ומותר להחליף אותה
 let lastAuto = store.get('concAuto') || '';
 function updateConclusion() {
   const t = $('stConc'), auto = autoConclusion();
@@ -1300,7 +1309,7 @@ async function buildReportPages() {
 
   newPage();
   ctx.fillStyle = C.navy; ctx.fillRect(0, 0, PW, 30 * k); ctx.fillStyle = C.accent; ctx.fillRect(0, 30 * k, PW, 7);
-  txt('PhysioMotion Lab – ניתוח חיישנים קליני של הסטודנט/ית', RX, 14 * k, `700 44px ${F}`, '#fff');
+  txt('PhysioMotion Lab – ניתוח חיישנים קליני של התלמיד/ה', RX, 14 * k, `700 44px ${F}`, '#fff');
   txt(`${P.title}  |  ${sel.map((p, i) => `${i + 1}. ${p.label}`).join('  ·  ')}`, RX, 23.5 * k, `500 24px ${F}`, '#E2E8F0');
   y = 30 * k + 50;
 
