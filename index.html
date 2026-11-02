@@ -238,6 +238,9 @@ td.val .chg{font-size:12px;font-weight:600}
 @media (max-width:480px){.namegrid{grid-template-columns:1fr}}
 .paircmp{display:grid;gap:8px;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .paircmp table{min-width:0}
+.disclaimer{display:flex;gap:12px;align-items:center;background:color-mix(in srgb,var(--amber) 16%,var(--surface));border:2px solid var(--amber);border-radius:14px;padding:12px 14px;color:var(--ink);font-size:15.5px;line-height:1.5}
+.disclaimer p{margin:0}
+.disc-ico{width:30px;height:30px;border-radius:50%;background:var(--amber);color:#1F1300;display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
 footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--ink-3);display:grid;gap:12px}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 16px;border-radius:12px;font-size:14.5px;z-index:40;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px)}
 @media print{header.top,footer,.no-print{display:none!important} body{background:#fff} .card{break-inside:avoid}}
@@ -267,6 +270,8 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
       <div class="fact"><b>החיבור פרטי</b>כל מחשב מקבל קוד חיבור אקראי משלו, ורק הטלפון שסרק אותו מתחבר אליו.</div>
     </div>
   </section>
+
+  <div class="disclaimer" role="note"><span class="disc-ico" aria-hidden="true">!</span><p><b>PhysioMotion Lab הוא סימולטור לימודי לתרגול חשיבה קלינית. אינו מכשיר רפואי ואין להשתמש בו לאבחון.</b></p></div>
 
   <!-- שלב 1: חיבור -->
   <section class="card step" id="step1" aria-labelledby="s1H">
@@ -429,8 +434,8 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
 </main>
 <footer>
   <span id="privacyNote">הנתונים נשמרים במכשיר. רענון הדף בטלפון מוחק את ההקלטות שלא נשמרו במחשב (השם והתצפיות נשמרים).</span>
-  <span>PhysioMotion Lab הוא סימולטור לימודי לתרגול חשיבה קלינית. אינו מכשיר רפואי ואין להשתמש בו לאבחון.</span>
-  <span><b>גרסה 2.11.2026-ב</b> · צליל אחד בלבד, בסוף ההקלטה</span>
+  <p class="disclaimer" style="margin:0"><span class="disc-ico" aria-hidden="true">!</span><b>PhysioMotion Lab הוא סימולטור לימודי לתרגול חשיבה קלינית. אינו מכשיר רפואי ואין להשתמש בו לאבחון.</b></p>
+  <span><b>גרסה 2.11.2026-ג</b> · צליל אחד בלבד, בסוף ההקלטה · הבהרה מודגשת</span>
 </footer>
 <div class="flash" id="flash" hidden></div>
 <div class="toast" id="toast" hidden></div>
@@ -1328,9 +1333,10 @@ async function buildReportPages() {
     pages.push(cv); y = M + 10;
   };
   const footer = () => {
-    ctx.direction = 'rtl'; ctx.font = `20px ${F}`; ctx.fillStyle = C.ink2; ctx.textAlign = 'right';
-    ctx.fillText('סימולציה לימודית להוראה קלינית. אינו מכשיר רפואי ואינו מיועד לאבחון.', RX, PH - 34);
-    ctx.textAlign = 'left'; ctx.fillText('עמוד ' + pages.length, M, PH - 34);
+    ctx.fillStyle = '#FEF3C7'; ctx.fillRect(M, PH - 66, CW, 46); ctx.fillStyle = '#F59E0B'; ctx.fillRect(RX - 6, PH - 66, 6, 46);
+    ctx.direction = 'rtl'; ctx.font = `700 20px ${F}`; ctx.fillStyle = C.navy; ctx.textAlign = 'right';
+    ctx.fillText('סימולטור לימודי לתרגול חשיבה קלינית. אינו מכשיר רפואי ואין להשתמש בו לאבחון.', RX - 18, PH - 36);
+    ctx.font = `20px ${F}`; ctx.fillStyle = C.ink2; ctx.textAlign = 'left'; ctx.fillText('עמוד ' + pages.length, M + 12, PH - 36);
   };
   const ensure = (h) => { if (y + h > PH - 80) { footer(); newPage(); } };
   const wrap = (text, maxW, font) => {
