@@ -106,6 +106,8 @@ textarea{min-height:100px;resize:vertical}
 #qrSlot{width:170px;height:170px;flex:none;border-radius:10px;background:#fff;display:grid;place-items:center;color:#64748B;font-size:12px;text-align:center;padding:8px}
 #qrSlot svg{width:100%;height:100%;display:block}
 .qrbox b{font-size:16px;display:block}
+.pairsteps{margin:8px 0 0;padding-inline-start:20px;font-size:14.5px;color:var(--ink)}
+.pairsteps li{margin:3px 0}
 .url{font-family:var(--font-mono);font-size:13px;direction:ltr;unicode-bidi:isolate;color:var(--accent-ink);word-break:break-all}
 @media (max-width:520px){.qrbox{flex-direction:column;text-align:center}}
 .linkstat{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14.5px;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
@@ -215,6 +217,7 @@ td.val .chg{font-size:12px;font-weight:600}
 .demo-flag{font-size:12px;font-weight:700;color:var(--warn-ink);background:color-mix(in srgb,var(--amber) 22%,transparent);padding:2px 8px;border-radius:6px}
 
 /* דוח */
+.namebox{border:2px solid var(--accent);border-radius:14px;padding:14px;display:grid;gap:10px}
 .autobox{background:var(--surface-2);border-radius:14px;padding:14px;display:grid;gap:10px}
 .autohead{margin:0;font-size:17px;font-weight:700;color:var(--ok-ink)}
 .autohead span{display:block;font-size:14.5px;font-weight:500;color:var(--ink-2)}
@@ -280,6 +283,11 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
         <div id="qrSlot">יוצר קוד…</div>
         <div><b>מחברים את הטלפון שלכם למחשב הזה</b>
           <p class="sub" style="margin-top:6px">פתחו את המצלמה בטלפון, כוונו אל הקוד והקישו על הקישור. מרגע החיבור, כל פעולה בטלפון או במחשב מופיעה בשניהם: בחירת בדיקה, התחלת הקלטה, התוצאות והדוח.</p>
+          <ol class="pairsteps">
+            <li>סורקים את הקוד במצלמת הטלפון ופותחים את הקישור.</li>
+            <li><b>בטלפון</b> לוחצים על הכפתור <b>"הפעלת חיישן התנועה"</b>. באייפון בוחרים "אפשר".</li>
+            <li>כשמופיע כאן "הטלפון מחובר והחיישן פעיל", ממשיכים לשלב 2, מכאן או מהטלפון.</li>
+          </ol>
           <p class="sub" style="margin-top:6px">הקוד שייך רק למחשב הזה. אם עובדים בלי מחשב, פשוט פותחים את המעבדה בטלפון.</p>
           <a class="url" id="joinUrl" href="#">—</a></div>
       </div>
@@ -328,8 +336,8 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
       <div class="row"><p class="subhead" style="flex:1;min-width:180px">מי בודק/ת ומי נבדק/ת?</p><div class="rounds" id="rounds" role="group" aria-label="סבבים"></div></div>
       <p class="sub">עובדים בזוג: בסבב 1 אחד/ת בודק/ת והשני/ה נבדק/ת, ובסבב 2 מחליפים תפקידים. כל בודק/ת כותב/ת ומגיש/ה דוח משלו/ה.</p>
       <div class="namegrid">
-        <label class="fld">בודק/ת (מפעיל/ה וכותב/ת את הדוח)<input type="text" id="nmExaminer" autocomplete="off" placeholder="לדוגמה: נועה"></label>
-        <label class="fld">נבדק/ת (מחזיק/ה את הטלפון)<input type="text" id="nmSubject" autocomplete="off" placeholder="לדוגמה: יעל"></label>
+        <label class="fld">בודק/ת (מפעיל/ה וכותב/ת את הדוח)<input type="text" id="nmExaminer" autocomplete="off" placeholder="שם פרטי או ראשי תיבות"></label>
+        <label class="fld">נבדק/ת (מחזיק/ה את הטלפון)<input type="text" id="nmSubject" autocomplete="off" placeholder="שם פרטי או ראשי תיבות"></label>
       </div>
       <button class="btn" id="swapBtn" type="button">⇄ החלפת תפקידים</button>
     </div>
@@ -402,12 +410,20 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
   <!-- שלב 5: דוח -->
   <section class="card step" id="step5" aria-labelledby="s5H">
     <div class="step-head"><span class="step-num">5</span><div><h2 id="s5H">כותבים ושולחים דוח</h2><p id="s5Sub">רוב הפרטים כבר מולאו. חסרות רק התצפיות שלך.</p></div></div>
+    <div class="namebox">
+      <p class="autohead" style="color:var(--ink)">מי בדק את מי?<span>כתבו שם פרטי או ראשי תיבות. השמות יופיעו בדוח, וכך ברור של מי כל תוצאה.</span></p>
+      <div class="namegrid">
+        <label class="fld">בודק/ת בסבב הזה<input type="text" id="rpExaminer" autocomplete="off" placeholder="שם פרטי או ראשי תיבות"></label>
+        <label class="fld">נבדק/ת בסבב הזה<input type="text" id="rpSubject" autocomplete="off" placeholder="שם פרטי או ראשי תיבות"></label>
+      </div>
+    </div>
     <div class="autobox">
       <p class="autohead">✓ הפרטים האלה מולאו אוטומטית<span>אין צורך למלא אותם. הם יופיעו בדוח כפי שהם.</span></p>
       <div class="autofill" id="autofill"></div>
     </div>
     <label class="fld"><span class="fldtitle">תצפיות קליניות</span><span class="fldhelp">כתבו מה ראיתם בעיניים במהלך הבדיקה. את החלק הזה ממלאים בעצמכם.</span><textarea id="stObs" placeholder="נדנוד נראה לעין, צעדי תיקון, שימוש בידיים, אופי הרעד (במנוחה / בהושטת יד), תחושת הנבדק/ת…"></textarea></label>
     <label class="fld"><span class="fldtitle">מסקנה אבחנתית</span><span class="fldhelp">המעבדה כתבה כאן טיוטה לפי התוצאות. קראו אותה, תקנו והוסיפו מה שצריך.</span><textarea id="stConc" placeholder="תופיע כאן אוטומטית אחרי שכל התנוחות נמדדו."></textarea></label>
+    <p class="fldhelp" style="margin:0">הדוח כולל את כל הסבבים שהושלמו: מי בדק/ה את מי, התוצאות, התצפיות והמסקנה של כל סבב, והשוואה בין שני הנבדקים.</p>
     <button class="bigbtn" id="pdfBtn" type="button">⬇ הורדת הדוח כ-PDF</button>
   </section>
 </main>
@@ -424,7 +440,7 @@ footer{max-width:820px;margin:0 auto 24px;padding-left:max(16px,env(safe-area-in
 const $ = (id) => document.getElementById(id);
 const G = 9.81;
 // טווחי מספרים כמו "3–6 Hz" מתהפכים בתוך טקסט עברי; סימן LRM לפני כל מספר שומר על הסדר
-const bidi = (s) => String(s).replace(/(^|[^\d.‎])(\d)/g, '$1‎$2');
+const bidi = (s) => String(s).replace(/(^|[^\d.‎+\-])([+\-]?\d)/g, '$1‎$2');
 function fixBidiDom(root = document.body) {
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => /SCRIPT|STYLE|TEXTAREA/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
   const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
@@ -440,20 +456,20 @@ const PDF_COLORS = ['#64748B', '#D97706', '#E11D48'];
 const PROTOCOLS = {
   sway: {
     title: 'בדיקת יציבות', dur: 30, placement: 'טלפון שטוח על עצם החזה, בשתי הידיים',
-    howto: ['<b>הנבדק/ת</b> עומד/ת יחף/ה ומצמיד/ה את הטלפון שטוח לעצם החזה בשתי הידיים.', '<b>הבודק/ת</b> לוחץ/ת "התחלה" (בטלפון או במחשב), מוסר/ת את הטלפון בזמן הספירה (5 שניות) ועומד/ת קרוב לשמירה מפני נפילה.', 'צליל ארוך = ההקלטה התחילה. שלושה צלילים עולים, רטט ומסך ירוק = סיום. בינתיים לא זזים ולא נוגעים במסך.'],
+    howto: ['<b>הנבדק/ת</b> עומד/ת יחף/ה ומצמיד/ה את הטלפון שטוח לעצם החזה בשתי הידיים.', '<b>הבודק/ת</b> לוחץ/ת "התחלה" (בטלפון או במחשב), מוסר/ת את הטלפון בזמן הספירה (5 שניות) ועומד/ת קרוב לשמירה מפני נפילה.', 'צליל ארוך = ההקלטה התחילה. בסוף נשמע צליל אחד ארוך, הטלפון רוטט והמסך נהיה ירוק. רק אחרי צליל הסיום זזים.'],
     positions: [
-      { id: 'open', label: 'עיניים פקוחות', role: 'בסיס להשוואה', sub: 'כך נראית היציבות כשהראייה עוזרת לשמור על שיווי משקל.', steps: ['עומדים יחפים, רגליים צמודות, הטלפון על החזה.', 'מבט קבוע על נקודה בגובה העיניים, במרחק 2 מטר.', 'עומדים בלי לזוז עד צליל הסיום.'] },
-      { id: 'closed', label: 'עיניים עצומות (רומברג)', role: 'בלי ראייה', sub: 'בלי ראייה הגוף נשען על חוש המנח ועל מערכת שיווי המשקל. אם הנדנוד קופץ, אחת מהן לא מפצה.', steps: ['אותה עמידה ואותה אחיזה, רגליים צמודות.', 'עוצמים עיניים כשהספירה מסתיימת.', 'הבודק/ת שומר/ת מפני נפילה.', 'פוקחים עיניים בצליל הסיום.'] },
-      { id: 'tandem', label: 'עמידת טנדם (עקב מול בוהן)', role: 'בסיס תמיכה צר', sub: 'עמידה על קו צר מעמיסה על המוחון (צרבלום) ששולט בשיווי המשקל.', steps: ['מציבים עקב אחת ממש לפני בהונות הרגל השנייה.', 'הטלפון על החזה, עיניים פקוחות.', 'מחזיקים את העמידה עד צליל הסיום. הבודק/ת שומר/ת מפני נפילה.'] }
+      { id: 'open', short: 'עיניים פקוחות', label: 'עיניים פקוחות', role: 'בסיס להשוואה', sub: 'כך נראית היציבות כשהראייה עוזרת לשמור על שיווי משקל.', steps: ['עומדים יחפים, רגליים צמודות, הטלפון על החזה.', 'מבט קבוע על נקודה בגובה העיניים, במרחק 2 מטר.', 'עומדים בלי לזוז עד צליל הסיום.'] },
+      { id: 'closed', short: 'עיניים עצומות', label: 'עיניים עצומות (רומברג)', role: 'בלי ראייה', sub: 'בלי ראייה הגוף נשען על חוש המנח ועל מערכת שיווי המשקל. אם הנדנוד קופץ, אחת מהן לא מפצה.', steps: ['אותה עמידה ואותה אחיזה, רגליים צמודות.', 'עוצמים עיניים כשהספירה מסתיימת.', 'הבודק/ת שומר/ת מפני נפילה.', 'פוקחים עיניים בצליל הסיום.'] },
+      { id: 'tandem', short: 'עמידת טנדם', label: 'עמידת טנדם (עקב מול בוהן)', role: 'בסיס תמיכה צר', sub: 'עמידה על קו צר מעמיסה על המוחון (צרבלום) ששולט בשיווי המשקל.', steps: ['מציבים עקב אחת ממש לפני בהונות הרגל השנייה.', 'הטלפון על החזה, עיניים פקוחות.', 'מחזיקים את העמידה עד צליל הסיום. הבודק/ת שומר/ת מפני נפילה.'] }
     ]
   },
   tremor: {
     title: 'בדיקת רעד ביד', dur: 15, placement: 'טלפון בכף היד, מסך למעלה',
-    howto: ['<b>הנבדק/ת</b> יושב/ת ומחזיק/ה את הטלפון בכף היד עם המסך למעלה, בלי ללחוץ חזק.', '<b>הבודק/ת</b> לוחץ/ת "התחלה" (בטלפון או במחשב) ומניח/ה את הטלפון בכף היד בזמן הספירה (5 שניות).', 'צליל ארוך = ההקלטה התחילה. שלושה צלילים עולים, רטט ומסך ירוק = סיום.'],
+    howto: ['<b>הנבדק/ת</b> יושב/ת ומחזיק/ה את הטלפון בכף היד עם המסך למעלה, בלי ללחוץ חזק.', '<b>הבודק/ת</b> לוחץ/ת "התחלה" (בטלפון או במחשב) ומניח/ה את הטלפון בכף היד בזמן הספירה (5 שניות).', 'צליל ארוך = ההקלטה התחילה. בסוף נשמע צליל אחד ארוך, הטלפון רוטט והמסך נהיה ירוק. רק אחרי צליל הסיום זזים.'],
     positions: [
-      { id: 'rest', label: 'יד נתמכת במנוחה', role: 'בסיס להשוואה', sub: 'רעד קטן ומהיר (8–12 Hz) קיים אצל כולם. זה הרעד הפיזיולוגי.', steps: ['האמה נתמכת על השולחן או על הירכיים.', 'הטלפון בכף היד, אצבעות רפויות.', 'נושמים רגיל ולא זזים עד צליל הסיום.'] },
-      { id: 'extended', label: 'יד מושטת קדימה', role: 'רעד יציבתי', sub: 'הושטת היד מגבירה רעד יציבתי: רעד פיזיולוגי מוגבר (קפאין, עייפות, לחץ) או רעד עצמוני.', steps: ['מרימים את היד ישר קדימה לגובה הכתף.', 'הטלפון שטוח בכף היד.', 'מחזיקים עד צליל הסיום.'] },
-      { id: 'distract', label: 'מנוחה עם הסחת דעת', role: 'רעד מנוחה', sub: 'רעד פרקינסוני מופיע דווקא במנוחה ובהסחת דעת, והוא איטי (3–6 Hz).', steps: ['האמה על הירכיים, הטלפון בכף יד רפויה.', 'עוצמים עיניים ומונים את החודשים מהסוף להתחלה.', 'לא מנסים בכוונה להחזיק את היד יציבה.'] }
+      { id: 'rest', short: 'יד במנוחה', label: 'יד נתמכת במנוחה', role: 'בסיס להשוואה', sub: 'רעד קטן ומהיר (8–12 Hz) קיים אצל כולם. זה הרעד הפיזיולוגי.', steps: ['האמה נתמכת על השולחן או על הירכיים.', 'הטלפון בכף היד, אצבעות רפויות.', 'נושמים רגיל ולא זזים עד צליל הסיום.'] },
+      { id: 'extended', short: 'יד מושטת', label: 'יד מושטת קדימה', role: 'רעד יציבתי', sub: 'הושטת היד מגבירה רעד יציבתי: רעד פיזיולוגי מוגבר (קפאין, עייפות, לחץ) או רעד עצמוני.', steps: ['מרימים את היד ישר קדימה לגובה הכתף.', 'הטלפון שטוח בכף היד.', 'מחזיקים עד צליל הסיום.'] },
+      { id: 'distract', short: 'הסחת דעת', label: 'מנוחה עם הסחת דעת', role: 'רעד מנוחה', sub: 'רעד פרקינסוני מופיע דווקא במנוחה ובהסחת דעת, והוא איטי (3–6 Hz).', steps: ['האמה על הירכיים, הטלפון בכף יד רפויה.', 'עוצמים עיניים ומונים את החודשים מהסוף להתחלה.', 'לא מנסים בכוונה להחזיק את היד יציבה.'] }
     ]
   }
 };
@@ -520,7 +536,8 @@ const sound = {
   start: () => { tone(1046, 0.6, 0, 0.6); vibrate(400); },
   last: () => { tone(520, 0.1, 0, 0.3, 'triangle'); },
   // סיום: שלושה צלילים עולים, פעמיים, עם רטט ארוך
-  end: () => { [0, 0.75].forEach(o => { tone(784, 0.18, o, 0.65); tone(1046, 0.18, o + 0.2, 0.65); tone(1568, 0.32, o + 0.4, 0.7); }); vibrate([300, 120, 300, 120, 600]); }
+  // סיום: צליל אחד ארוך וברור, ורטט ארוך
+  end: () => { tone(880, 1.0, 0, 0.75); vibrate(900); }
 };
 function flash(title, sub) {
   const f = $('flash'); f.innerHTML = `<div>${title}<small>${sub}</small></div>`; f.hidden = false;
@@ -898,15 +915,22 @@ let lastSec = null, lastLive = 0;
 function tickRecording() {
   const el = performance.now() / 1000 - S.recStart, left = Math.max(0, S.recDur - el), sec = Math.ceil(left);
   $('timerVal').textContent = sec; $('progBar').style.width = Math.min(100, 100 * el / S.recDur).toFixed(1) + '%';
-  if (sec !== lastSec && sec <= 3 && sec > 0) sound.last();
   lastSec = sec;
   if (performance.now() - lastLive > 500) { lastLive = performance.now(); link.live(); }
   if (left <= 0) finishRecording();
+}
+// מסיר את חצי השנייה הראשונה והאחרונה: שם נוטים לזוז (הנחת הטלפון, תגובה לצליל)
+function trimEdges(rec, sec) {
+  const t0 = rec.t[0] + sec, t1 = rec.t[rec.t.length - 1] - sec;
+  const keep = rec.t.map((t, i) => t >= t0 && t <= t1 ? i : -1).filter(i => i >= 0);
+  if (keep.length < 40) return;
+  ['t', 'x', 'y', 'z'].forEach(k => { rec[k] = keep.map(i => rec[k][i]); });
 }
 function finishRecording() {
   sound.end();
   const rec = S.curRec, id = S.cur; S.curRec = null; S.mode = 'idle'; S.cur = null; lastSec = null; keepAwake(false);
   if (!rec || rec.t.length < 40) { toast('נקלטו מעט מדי נתונים. בדקו שהחיישן פעיל (שלב 1) ונסו שוב.'); renderTestCard(); link.live(); return; }
+  trimEdges(rec, 0.5);
   rec.dur = rec.t[rec.t.length - 1] - rec.t[0];
   S.rec[id] = { source: rec.source }; S.res[id] = analyze(rec, S.proto); S.demo = false;
   const nxt = nextPos();
@@ -946,8 +970,8 @@ function renderRoles() {
   const a = nameOr('a'), b = nameOr('b');
   $('rounds').innerHTML = [1, 2].map(n => `<button class="round" type="button" data-round="${n}" aria-pressed="${n === S.round}">סבב ${n}: ${esc(n === 1 ? a : b)} בודק/ת את ${esc(n === 1 ? b : a)}${roundDone(n) ? ' <span class="ok">✓</span>' : ''}</button>`).join('');
   $('rounds').querySelectorAll('[data-round]').forEach(btn => btn.addEventListener('click', () => switchRound(+btn.dataset.round)));
-  if (document.activeElement !== $('nmExaminer')) $('nmExaminer').value = S.names[examinerKey()];
-  if (document.activeElement !== $('nmSubject')) $('nmSubject').value = S.names[subjectKey()];
+  ['nmExaminer', 'rpExaminer'].forEach(id => { if (document.activeElement !== $(id)) $(id).value = S.names[examinerKey()]; });
+  ['nmSubject', 'rpSubject'].forEach(id => { if (document.activeElement !== $(id)) $(id).value = S.names[subjectKey()]; });
   const other = S.round === 1 ? 2 : 1;
   $('swapBtn').textContent = `⇄ החלפת תפקידים: עכשיו ${subject()} בודק/ת את ${examiner()} (סבב ${other})`;
   $('swapBtn').disabled = busy();
@@ -965,7 +989,7 @@ function switchRound(n, fromRemote = false) {
   if (!fromRemote) { link.cfg(); link.res(); link.notes(); toast(`סבב ${n}: ${examiner()} בודק/ת את ${subject()}.`); }
 }
 $('swapBtn').addEventListener('click', () => { switchRound(S.round === 1 ? 2 : 1); $('step3').scrollIntoView({ behavior: 'smooth' }); });
-[['nmExaminer', examinerKey], ['nmSubject', subjectKey]].forEach(([id, key]) => $(id).addEventListener('input', () => {
+[['nmExaminer', examinerKey], ['nmSubject', subjectKey], ['rpExaminer', examinerKey], ['rpSubject', subjectKey]].forEach(([id, key]) => $(id).addEventListener('input', () => {
   const k = key(); S.names[k] = $(id).value.slice(0, 40); store.set(k === 'a' ? 'nameA' : 'nameB', S.names[k]);
   renderRoles(); renderAutofill(); updateConclusion();
   clearTimeout(renderRoles._t); renderRoles._t = setTimeout(() => link.cfg(), 500);
@@ -1252,7 +1276,7 @@ function sourceText() {
 function renderAutofill() {
   const P = proto();
   // קצרים בזוגות, ארוכים בשורה מלאה בסוף
-  const items = [['בודק/ת', examiner()], ['נבדק/ת', subject()], ['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title], ['מצב הנבדק/ת', S.scenario], ['תאריך', new Date().toLocaleDateString('he-IL')],
+  const items = [['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title], ['מצב הנבדק/ת', S.scenario], ['תאריך', new Date().toLocaleDateString('he-IL')],
     ['תנוחות', selected().map((p, i) => `${i + 1}. ${p.label}`).join(' · ')], ['אחיזת הטלפון', P.placement], ['מקור הנתונים', sourceText()]];
   $('autofill').innerHTML = items.map(([k, v]) => `<div${['תנוחות', 'אחיזת הטלפון', 'מקור הנתונים'].includes(k) ? ' class="wide"' : ''}>${k}<b>${v}</b></div>`).join('');
   fixBidiDom($('autofill'));
@@ -1279,12 +1303,27 @@ S.round = +store.get('round') === 2 ? 2 : 1;
 /* ---------- דוח PDF ----------
    jsPDF אינו תומך בעברית בגופנים המובנים, לכן כל עמוד A4 מצויר על canvas
    (הדפדפן מטפל בכיווניות ובגופן העברי) ומוטמע כתמונה בקובץ ה-PDF. */
+// מריץ את fn כשסבב n טעון ב-S (כדי לצייר בדוח את שני הסבבים באותן פונקציות), ומחזיר את המצב הקודם
+function withRound(n, fn) {
+  if (n === S.round) return fn({ obs: $('stObs').value.trim(), conc: $('stConc').value.trim() });
+  const r = S.rounds[n], keep = { proto: S.proto, sel: S.sel, scenario: S.scenario, res: S.res, rec: S.rec, demo: S.demo, round: S.round };
+  Object.assign(S, { proto: r.proto, sel: r.sel, scenario: r.scenario, res: r.res, rec: r.rec, demo: r.demo, round: n });
+  try { return fn({ obs: (r.obs || '').trim(), conc: (r.conc || '').trim() }); } finally { Object.assign(S, keep); }
+}
+const doneRounds = () => [1, 2].filter(roundDone);
+const roundData = (n) => n === S.round ? { proto: S.proto, res: S.res } : S.rounds[n];
+
+/* ---------- דוח PDF ----------
+   jsPDF אינו תומך בעברית בגופנים המובנים, לכן כל עמוד A4 מצויר על canvas
+   (הדפדפן מטפל בכיווניות ובגופן העברי) ומוטמע כתמונה בקובץ ה-PDF.
+   הדוח כולל את כל הסבבים שהושלמו, כל אחד בכותרת "סבב n: א׳ בודק/ת את ב׳". */
 async function buildReportPages() {
   try { await document.fonts.load('600 20px "IBM Plex Sans Hebrew"'); await document.fonts.load('20px "IBM Plex Mono"'); } catch (e) {}
   const PW = 1240, PH = 1754, k = PW / 210, M = 15 * k, CW = PW - 2 * M, RX = PW - M;
-  const F = '"IBM Plex Sans Hebrew", Arial, sans-serif';
-  const accent = S.proto === 'tremor' ? '#8B5CF6' : '#06B6D4';
-  const C = { navy: '#0F172A', accent, amber: '#F59E0B', red: '#EF4444', green: '#10B981', ink: '#1E293B', ink2: '#475569', line: '#E2E8F0', soft: '#F1F5F9' };
+  const F = '"IBM Plex Sans Hebrew", Arial, sans-serif', MONO = '"IBM Plex Mono", monospace';
+  const ACCENT = { sway: '#06B6D4', tremor: '#8B5CF6' };
+  const C = { navy: '#0F172A', amber: '#F59E0B', red: '#EF4444', green: '#10B981', ink: '#1E293B', ink2: '#475569', line: '#E2E8F0', soft: '#F1F5F9' };
+  const LH = 34; // גובה שורת טקסט
   const pages = []; let cv, ctx, y;
   const newPage = () => {
     cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; ctx = cv.getContext('2d');
@@ -1297,108 +1336,166 @@ async function buildReportPages() {
     ctx.textAlign = 'left'; ctx.fillText('עמוד ' + pages.length, M, PH - 34);
   };
   const ensure = (h) => { if (y + h > PH - 80) { footer(); newPage(); } };
-  const wrap = (text, maxW) => {
+  const wrap = (text, maxW, font) => {
+    if (font) ctx.font = font;
     const out = []; String(text).split('\n').forEach(par => {
-      let line = ''; par.split(/\s+/).forEach(w => { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; });
+      let line = ''; par.split(/\s+/).forEach(w => { const t = line ? line + ' ' + w : w; if (ctx.measureText(bidi(t)).width > maxW && line) { out.push(line); line = w; } else line = t; });
       out.push(line);
     }); return out;
   };
   const txt = (s, x, yy, font, color, align = 'right') => { ctx.direction = 'rtl'; ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(bidi(s), x, yy); };
-  const sec = (title, need = 0) => { ensure(76 + need); y += 14; txt(title, RX, y + 26, `700 30px ${F}`, C.navy); ctx.fillStyle = C.accent; ctx.fillRect(RX - 110, y + 38, 110, 5); y += 62; };
-  const P = proto(), sel = selected();
-
-  newPage();
-  ctx.fillStyle = C.navy; ctx.fillRect(0, 0, PW, 30 * k); ctx.fillStyle = C.accent; ctx.fillRect(0, 30 * k, PW, 7);
-  txt('PhysioMotion Lab – ניתוח חיישנים קליני של התלמיד/ה', RX, 14 * k, `700 44px ${F}`, '#fff');
-  txt(`${P.title}  |  ${sel.map((p, i) => `${i + 1}. ${p.label}`).join('  ·  ')}`, RX, 23.5 * k, `500 24px ${F}`, '#E2E8F0');
-  y = 30 * k + 50;
-
-  const now = new Date();
-  const info = [['בודק/ת', examiner()], ['נבדק/ת', subject()], ['תאריך ושעה', now.toLocaleString('he-IL')], ['סבב', `${S.round} מתוך 2`], ['בדיקה', P.title],
-    ['מצב הנבדק/ת', S.scenario], ['אחיזת הטלפון', P.placement], ['מקור הנתונים', sourceText()]];
-  info.forEach(([kk, v], i) => {
-    const cx = RX - (i % 2) * (CW / 2), cy = y + Math.floor(i / 2) * 40;
-    txt(kk + ':', cx, cy, `600 23px ${F}`, C.ink2);
-    ctx.font = `600 23px ${F}`; const kw = ctx.measureText(kk + ': ').width;
-    ctx.font = `23px ${F}`; let vv = String(v); while (ctx.measureText(vv).width > CW / 2 - kw - 30 && vv.length > 3) vv = vv.slice(0, -2);
-    txt(vv, cx - kw - 8, cy, `23px ${F}`, C.navy);
-  });
-  y += 160;
-
-  const sm = summaryData(), col = sm.kind === 'alert' ? C.red : sm.kind === 'warn' ? C.amber : C.green;
-  ctx.font = `23px ${F}`; const body = wrap(sm.text, CW - 60);
-  const ch = 130 + sm.items.length * 34 + body.length * 34;
-  sec('סיכום אבחנתי', ch);
-  ctx.fillStyle = '#F8FAFC'; ctx.strokeStyle = col; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(M, y, CW, ch, 16) : ctx.rect(M, y, CW, ch); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = col; ctx.fillRect(RX - 10, y + 12, 8, ch - 24);
-  ctx.direction = 'ltr'; ctx.font = `600 58px "IBM Plex Mono", monospace`; ctx.fillStyle = C.navy; ctx.textAlign = 'right'; ctx.fillText(sm.headline, RX - 30, y + 68);
-  const hw = ctx.measureText(sm.headline).width;
-  txt(sm.headLabel, RX - 50 - hw, y + 66, `24px ${F}`, C.ink2);
-  txt(sm.verdict, RX - 30, y + 106, `700 25px ${F}`, col);
-  let yy = y + 142;
-  sm.items.forEach(it => { txt('• ' + it.line, RX - 30, yy, `500 23px ${F}`, C.navy); yy += 34; });
-  body.forEach(l => { yy += 0; txt(l, RX - 30, yy + 8, `23px ${F}`, C.ink); yy += 34; });
-  y += ch + 20;
-
-  const pal = { fill: true, bg: '#FFFFFF', grid: '#E2E8F0', ink: '#334155', ink3: '#64748B' };
-  const chartH = 400;
-  const drawLegend = () => {
-    const w = CW / 3;
-    sel.forEach((p, i) => { const x = RX - i * w; ctx.fillStyle = PDF_COLORS[i]; ctx.fillRect(x - 30, y + 2, 30, 6); txt(`${i + 1}. ${p.label}`, x - 42, y + 12, `22px ${F}`, C.ink2); });
-    y += 40;
+  const sec = (title, need = 0, accent = C.navy) => { ensure(76 + need); y += 14; txt(title, RX, y + 26, `700 30px ${F}`, C.navy); ctx.fillStyle = accent; ctx.fillRect(RX - 110, y + 38, 110, 5); y += 62; };
+  // שורות "מפתח: ערך" בשתי עמודות; ערך ארוך נשבר לשורות ואינו נחתך. wide = שורה מלאה
+  const kvLines = (k, v, w) => { ctx.font = `600 23px ${F}`; const kw = ctx.measureText(k + ': ').width; return wrap(v, w - kw - 8, `23px ${F}`); };
+  const drawKV = (x, k, v, w) => {
+    txt(k + ':', x, y + 24, `600 23px ${F}`, C.ink2);
+    ctx.font = `600 23px ${F}`; const kw = ctx.measureText(k + ': ').width;
+    kvLines(k, v, w).forEach((l, j) => txt(l, x - kw - 8, y + 24 + j * LH, `23px ${F}`, C.navy));
   };
-  sec('השוואה לאורך זמן', chartH + 54);
-  drawChart(ctx, CW, chartH, { ...optsFromData(chartData(), 'time', PDF_COLORS), fs: 20, padL: 80, xTicks: 8 }, pal, M, y); y += chartH + 14; drawLegend();
-  sec('השוואה לפי מהירות התנודה (ספקטרום)', chartH + 24);
-  drawChart(ctx, CW, chartH, { ...optsFromData(chartData(), 'freq', PDF_COLORS), fs: 20, padL: 80, xTicks: 8 }, pal, M, y); y += chartH + 24;
-
-  const rws = rows(), rowH = 58, nameW = CW * 0.42, colW = (CW - nameW) / sel.length;
-  const colX = (i) => RX - nameW - colW * i - colW / 2;
-  sec('המספרים', rowH * (rws.length + 2));
-  ctx.fillStyle = C.navy; ctx.fillRect(M, y, CW, rowH);
-  txt('מדד', RX - 14, y + 37, `700 22px ${F}`, '#fff');
-  sel.forEach((p, i) => txt(`${i + 1}. ${p.label}`, colX(i), y + 37, `700 19px ${F}`, '#fff', 'center'));
-  y += rowH;
-  const numTxt = (s, x, yo, font, color) => { ctx.direction = 'ltr'; ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(s, x, y + yo); };
-  rws.forEach((r, ri) => {
-    if (ri % 2) { ctx.fillStyle = C.soft; ctx.fillRect(M, y, CW, rowH); }
-    txt(r.n, RX - 14, y + 36, `22px ${F}`, C.navy);
-    r.vals.forEach((v, i) => {
-      const hasCh = r.ch[i] != null;
-      numTxt(fmt(v, r.d), colX(i), hasCh ? 28 : 36, `500 22px "IBM Plex Mono", monospace`, C.navy);
-      if (hasCh) numTxt(fmtPct(r.ch[i]), colX(i), 50, `600 17px "IBM Plex Mono", monospace`, r.ch[i] > 0 ? '#DC2626' : '#059669');
-    });
-    y += rowH;
-  });
-  if (sm.romberg != null) { txt('יחס רומברג (עיניים עצומות ÷ עיניים פקוחות)', RX - 14, y + 36, `700 22px ${F}`, C.navy); numTxt(sm.romberg.toFixed(2), M + 80, 36, `700 22px "IBM Plex Mono", monospace`, C.navy); y += rowH; }
-  ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(M, y); ctx.lineTo(RX, y); ctx.stroke();
-  y += 16;
-
-  const block = (title, text) => {
-    sec(title, 72);
-    ctx.font = `23px ${F}`;
-    wrap(text || '(לא מולא)', CW).forEach(l => { ensure(36); txt(l, RX, y + 24, `23px ${F}`, C.ink); y += 36; });
+  const infoGrid = (items) => {
+    const half = CW / 2 - 20;
+    for (let i = 0; i < items.length;) {
+      const [k1, v1, wide] = items[i];
+      if (wide) { const h = kvLines(k1, v1, CW).length; ensure(h * LH + 8); drawKV(RX, k1, v1, CW); y += h * LH + 8; i++; continue; }
+      const nx = items[i + 1] && !items[i + 1][2] ? items[i + 1] : null;
+      const h = Math.max(kvLines(k1, v1, half).length, nx ? kvLines(nx[0], nx[1], half).length : 1);
+      ensure(h * LH + 8); drawKV(RX, k1, v1, half); if (nx) drawKV(RX - CW / 2, nx[0], nx[1], half);
+      y += h * LH + 8; i += nx ? 2 : 1;
+    }
+  };
+  const textBlock = (title, text, accent) => {
+    sec(title, 72, accent);
+    wrap(text || '(לא מולא)', CW, `23px ${F}`).forEach(l => { ensure(LH + 2); txt(l, RX, y + 24, `23px ${F}`, C.ink); y += LH + 2; });
     y += 10;
   };
-  block('תצפיות קליניות', $('stObs').value.trim());
-  block('מסקנה אבחנתית', $('stConc').value.trim());
+
+  // ----- כותרת ופרטי הזוג -----
+  newPage();
+  const now = new Date(), rounds = doneRounds(), a = nameOr('a'), b = nameOr('b');
+  ctx.fillStyle = C.navy; ctx.fillRect(0, 0, PW, 30 * k); ctx.fillStyle = ACCENT[S.proto]; ctx.fillRect(0, 30 * k, PW, 7);
+  txt('PhysioMotion Lab – דוח בדיקה בזוג', RX, 14 * k, `700 44px ${F}`, '#fff');
+  txt(`${a} ו${b}  ·  ${now.toLocaleDateString('he-IL')}`, RX, 23.5 * k, `500 26px ${F}`, '#E2E8F0');
+  y = 30 * k + 40;
+  infoGrid([['תלמיד/ה א׳', a], ['תלמיד/ה ב׳', b], ['תאריך ושעה', now.toLocaleString('he-IL')], ['בדוח', rounds.map(n => `סבב ${n}`).join(' ו')]]);
+  y += 10;
+
+  // ----- כל סבב -----
+  const pal = { fill: true, bg: '#FFFFFF', grid: '#E2E8F0', ink: '#334155', ink3: '#64748B' };
+  const chartH = 340;
+  const drawRound = (n, notes) => {
+    const P = proto(), sel = selected(), sm = summaryData(), acc = ACCENT[S.proto];
+    // כל סבב מתחיל בעמוד חדש (חוץ מהראשון), כדי שהכותרת לא תישאר לבד בתחתית עמוד
+    if (n !== rounds[0]) { footer(); newPage(); } else ensure(420);
+    ctx.fillStyle = acc; ctx.fillRect(M, y, CW, 64);
+    txt(`סבב ${n}: ${examiner()} בודק/ת את ${subject()}`, RX - 18, y + 43, `700 32px ${F}`, '#fff');
+    y += 84;
+    infoGrid([['בודק/ת', examiner()], ['נבדק/ת', subject()], ['בדיקה', P.title], ['מצב הנבדק/ת', S.scenario],
+      ['תנוחות', sel.map((p, i) => `${i + 1}. ${p.label}`).join('  ·  '), true], ['אחיזת הטלפון', P.placement, true], ['מקור הנתונים', sourceText(), true]]);
+
+    // סיכום
+    const col = sm.kind === 'alert' ? C.red : sm.kind === 'warn' ? C.amber : C.green;
+    const itemLines = sm.items.map(it => wrap('• ' + it.line, CW - 60, `500 23px ${F}`)), body = wrap(sm.text, CW - 60, `23px ${F}`);
+    const nItem = itemLines.reduce((s, l) => s + l.length, 0);
+    const ch = 130 + nItem * LH + body.length * LH;
+    sec(`סיכום אבחנתי של ${subject()}`, ch, acc);
+    ctx.fillStyle = '#F8FAFC'; ctx.strokeStyle = col; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(M, y, CW, ch, 16) : ctx.rect(M, y, CW, ch); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = col; ctx.fillRect(RX - 10, y + 12, 8, ch - 24);
+    ctx.direction = 'ltr'; ctx.font = `600 58px ${MONO}`; ctx.fillStyle = C.navy; ctx.textAlign = 'right'; ctx.fillText(sm.headline, RX - 30, y + 68);
+    const hw = ctx.measureText(sm.headline).width;
+    wrap(sm.headLabel, CW - 90 - hw, `24px ${F}`).slice(0, 1).forEach(l => txt(l, RX - 50 - hw, y + 66, `24px ${F}`, C.ink2));
+    txt(sm.verdict, RX - 30, y + 106, `700 25px ${F}`, col);
+    let yy = y + 142;
+    itemLines.forEach(ls => ls.forEach(l => { txt(l, RX - 30, yy, `500 23px ${F}`, C.navy); yy += LH; }));
+    body.forEach(l => { txt(l, RX - 30, yy + 8, `23px ${F}`, C.ink); yy += LH; });
+    y += ch + 20;
+
+    // גרפים
+    const legend = () => {
+      const w = CW / sel.length;
+      sel.forEach((p, i) => { const x = RX - i * w; ctx.fillStyle = PDF_COLORS[i]; ctx.fillRect(x - 30, y + 2, 30, 6); txt(`${i + 1}. ${p.short}`, x - 42, y + 12, `22px ${F}`, C.ink2); });
+      y += 40;
+    };
+    sec('השוואה לאורך זמן', chartH + 54, acc);
+    drawChart(ctx, CW, chartH, { ...optsFromData(chartData(), 'time', PDF_COLORS), fs: 20, padL: 80, xTicks: 8 }, pal, M, y); y += chartH + 14; legend();
+    sec('השוואה לפי מהירות התנודה (ספקטרום)', chartH + 54, acc);
+    drawChart(ctx, CW, chartH, { ...optsFromData(chartData(), 'freq', PDF_COLORS), fs: 20, padL: 80, xTicks: 8 }, pal, M, y); y += chartH + 14; legend();
+
+    // טבלה: כותרות קצרות שנשברות לשתי שורות, כדי שלא ייחתכו
+    const rws = rows(), nameW = CW * 0.4, colW = (CW - nameW) / sel.length, rowH = 58;
+    const colX = (i) => RX - nameW - colW * i - colW / 2;
+    const heads = sel.map((p, i) => wrap(`${i + 1}. ${p.short}`, colW - 16, `700 20px ${F}`).slice(0, 2));
+    const headH = Math.max(...heads.map(h => h.length)) > 1 ? 76 : rowH;
+    sec('המספרים', headH + rowH * (rws.length + 1), acc);
+    ctx.fillStyle = C.navy; ctx.fillRect(M, y, CW, headH);
+    txt('מדד', RX - 14, y + headH / 2 + 8, `700 22px ${F}`, '#fff');
+    heads.forEach((h, i) => h.forEach((l, j) => txt(l, colX(i), y + headH / 2 + 8 - (h.length - 1) * 13 + j * 26, `700 20px ${F}`, '#fff', 'center')));
+    y += headH;
+    const numTxt = (s, x, yo, font, color) => { ctx.direction = 'ltr'; ctx.font = font; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(s, x, y + yo); };
+    rws.forEach((r, ri) => {
+      if (ri % 2) { ctx.fillStyle = C.soft; ctx.fillRect(M, y, CW, rowH); }
+      wrap(r.n, nameW - 24, `22px ${F}`).slice(0, 2).forEach((l, j, arr) => txt(l, RX - 14, y + (arr.length > 1 ? 25 + j * 24 : 36), `22px ${F}`, C.navy));
+      r.vals.forEach((v, i) => {
+        const hasCh = r.ch[i] != null;
+        numTxt(fmt(v, r.d), colX(i), hasCh ? 28 : 36, `500 22px ${MONO}`, C.navy);
+        if (hasCh) numTxt(fmtPct(r.ch[i]), colX(i), 50, `600 17px ${MONO}`, r.ch[i] > 0 ? '#DC2626' : '#059669');
+      });
+      y += rowH;
+    });
+    if (sm.romberg != null) { txt('יחס רומברג (עיניים עצומות ÷ עיניים פקוחות)', RX - 14, y + 36, `700 22px ${F}`, C.navy); numTxt(sm.romberg.toFixed(2), colX(Math.max(0, sel.findIndex(p => p.id === 'closed'))), 36, `700 22px ${MONO}`, C.navy); y += rowH; }
+    ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(M, y); ctx.lineTo(RX, y); ctx.stroke();
+    y += 16;
+
+    textBlock(`תצפיות קליניות של ${examiner()}`, notes.obs, acc);
+    textBlock(`מסקנה אבחנתית של ${examiner()}`, notes.conc, acc);
+    y += 10;
+  };
+  rounds.forEach(n => withRound(n, (notes) => drawRound(n, notes)));
+
+  // ----- השוואה בין שני הנבדקים -----
+  const r1 = roundData(1), r2 = roundData(2);
+  if (rounds.length === 2 && r1.proto === r2.proto) {
+    const P = PROTOCOLS[r1.proto], ids = P.positions.map(p => p.id).filter(id => r1.res[id] && r2.res[id]), tremor = r1.proto === 'tremor', rowH = 52;
+    if (ids.length) {
+      sec('השוואה בין שני הנבדקים', rowH * (ids.length + 1) + 60, ACCENT[r1.proto]);
+      wrap(`${tremor ? 'עוצמת הרעד (RMS, m/s²) ומהירות הרעד' : 'עוצמת הנדנוד (RMS, m/s²)'} בכל תנוחה. גם אצל אנשים בריאים הערכים שונים מאדם לאדם, ולכן כל נבדק/ת מושווה קודם כול לבסיס של עצמו/ה.`, CW, `21px ${F}`)
+        .forEach(l => { txt(l, RX, y + 22, `21px ${F}`, C.ink2); y += 30; });
+      y += 8;
+      const cols = [RX - CW * 0.55, RX - CW * 0.82];
+      ctx.fillStyle = C.navy; ctx.fillRect(M, y, CW, rowH);
+      txt('תנוחה', RX - 14, y + 34, `700 21px ${F}`, '#fff');
+      txt(`${b} (נבדק/ת בסבב 1)`, cols[0], y + 34, `700 20px ${F}`, '#fff', 'center');
+      txt(`${a} (נבדק/ת בסבב 2)`, cols[1], y + 34, `700 20px ${F}`, '#fff', 'center');
+      y += rowH;
+      ids.forEach((id, i) => {
+        if (i % 2) { ctx.fillStyle = C.soft; ctx.fillRect(M, y, CW, rowH); }
+        txt(P.positions.find(p => p.id === id).label, RX - 14, y + 34, `22px ${F}`, C.navy);
+        [r1.res[id], r2.res[id]].forEach((r, j) => {
+          ctx.direction = 'ltr'; ctx.font = `500 22px ${MONO}`; ctx.fillStyle = C.navy; ctx.textAlign = 'center';
+          ctx.fillText(fmt(r.rms, 3) + (tremor ? `  ·  ${fmt(r.domF, 1)} Hz` : ''), cols[j], y + 34);
+        });
+        y += rowH;
+      });
+      y += 16;
+    }
+  }
+
   ctx.font = `19px ${F}`;
-  const meth = wrap('שיטה: מד התאוצה של הטלפון (DeviceMotionEvent, ‏accelerationIncludingGravity). האותות נדגמו מחדש, נוכתה הכבידה, בוצע סינון תדרים והטלה על הציר העיקרי. ערכי המרחק (מ״מ) מבוססים על אינטגרציה כפולה ומעידים על מגמות בלבד.', CW);
+  const meth = wrap('שיטה: מד התאוצה של הטלפון (DeviceMotionEvent, ‏accelerationIncludingGravity). חצי השנייה הראשונה והאחרונה של כל הקלטה הוסרו. האותות נדגמו מחדש, נוכתה הכבידה, בוצע סינון תדרים והטלה על הציר העיקרי. ערכי המרחק (מ״מ) מבוססים על אינטגרציה כפולה ומעידים על מגמות בלבד.', CW, `19px ${F}`);
   ensure(meth.length * 28 + 10); meth.forEach(l => { txt(l, RX, y + 20, `19px ${F}`, C.ink2); y += 28; });
   footer();
   return pages;
 }
 async function exportPDF() {
-  if (!allDone()) { toast('קודם צריך למדוד את כל התנוחות שסומנו (שלב 3), או לטעון דוגמה מוכנה.'); $('step3').scrollIntoView({ behavior: 'smooth' }); return; }
+  if (!doneRounds().length) { toast('קודם צריך למדוד את כל התנוחות שסומנו (שלב 3), או לטעון דוגמה מוכנה.'); $('step3').scrollIntoView({ behavior: 'smooth' }); return; }
   if (!window.jspdf) { toast('אין חיבור לאינטרנט ולכן אי אפשר ליצור PDF. נפתחת תצוגת הדפסה.'); window.print(); return; }
   const btn = $('pdfBtn'); btn.disabled = true; btn.textContent = 'מכין את הדוח…';
   try {
     const pages = await buildReportPages();
     const { jsPDF } = window.jspdf, doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
     pages.forEach((p, i) => { if (i) doc.addPage(); doc.addImage(p.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297); });
-    const safe = (examiner() || 'student').replace(/[^\w֐-׿-]+/g, '_');
-    doc.save(`PhysioMotion_${S.proto}_${safe}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    const safe = (v) => v.replace(/[^\w֐-׿-]+/g, '_');
+    doc.save(`PhysioMotion_${safe(nameOr('a'))}_${safe(nameOr('b'))}_${new Date().toISOString().slice(0, 10)}.pdf`);
     toast('הדוח נשמר בהורדות.');
     markStep(5, true);
   } catch (e) { console.error(e); toast('יצירת הדוח נכשלה: ' + e.message); }
